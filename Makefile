@@ -3,14 +3,24 @@ SHELL := bash
 CC := go build
 CC_ARGS := --mod=vendor
 CURRENT_DIR := $(shell pwd)
+BIN_DIR := $(CURRENT_DIR)/bin
 
-build:
-	mkdir -p $(CURRENT_DIR)/bin
-	GOOS="darwin" GOARCH="arm64" $(CC) $(CC_ARGS) -o bin/fibo_darwin_arm64
-	GOOS="darwin" GOARCH="amd64" $(CC) $(CC_ARGS) -o bin/fibo_darwin_amd64
-	GOOS="linux"  GOARCH="arm64" $(CC) $(CC_ARGS) -o bin/fibo_linux_arm64
-	GOOS="linux"  GOARCH="386"   $(CC) $(CC_ARGS) -o bin/fibo_linux_386
-	GOOS="linux"  GOARCH="amd64" $(CC) $(CC_ARGS) -o bin/fibo_linux_amd64
+GOOS ?= darwin
+GOARCH ?= arm64
+
+list-build-targets:
+	go tool dist list
+
+$(BIN_DIR):
+	mkdir -p $@
+
+build: $(BIN_DIR)
+	GOOS=$(GOOS) GOARCH=$(GOARCH) $(CC) $(CC_ARGS) -o $(BIN_DIR)/fibo_$(GOOS)_$(GOARCH)
+
+update-deps:
+	go get -u
+	go mod vendor
+	git add go.mod go.sum vendor/*
 
 clean:
-	rm -rf $(CURRENT_DIR)/bin
+	rm -rf $(BIN_DIR)
