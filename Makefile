@@ -1,9 +1,10 @@
 #!/usr/bin/env make
+.PHONY: docker list-build-targets update-deps
 SHELL := bash
-CC := go build
-CC_ARGS := --mod=vendor
-CURRENT_DIR := $(shell pwd)
-BIN_DIR := $(CURRENT_DIR)/bin
+CC_CMD := go build
+CC_OPTS := --mod=vendor
+TEST_CMD := go test
+TEST_OPTS := -v
 
 GOOS ?= darwin
 GOARCH ?= arm64
@@ -11,11 +12,16 @@ GOARCH ?= arm64
 list-build-targets:
 	go tool dist list
 
-$(BIN_DIR):
-	mkdir -p $@
+fibo_$(GOOS)_$(GOARCH):
+	GOOS=$(GOOS) GOARCH=$(GOARCH) $(CC_CMD) $(CC_OPTS) -o $@
 
-build: $(BIN_DIR)
-	GOOS=$(GOOS) GOARCH=$(GOARCH) $(CC) $(CC_ARGS) -o $(BIN_DIR)/fibo_$(GOOS)_$(GOARCH)
+build: fibo_$(GOOS)_$(GOARCH)
+
+test:
+	$(TEST_CMD) $(TEST_OPTS) ./...
+
+docker:
+	docker build -f ./docker/Dockerfile -t fibo:dev .
 
 update-deps:
 	go get -u
@@ -23,4 +29,4 @@ update-deps:
 	git add go.mod go.sum vendor/*
 
 clean:
-	rm -rf $(BIN_DIR)
+	rm fibo_*
