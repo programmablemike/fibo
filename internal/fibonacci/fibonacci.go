@@ -3,22 +3,8 @@
 package fibonacci
 
 import (
-	pgx "github.com/jackc/pgx/v4"
 	log "github.com/sirupsen/logrus"
 )
-
-type Memoizer struct {
-	Store *pgx.Conn
-}
-
-func (m *Memoizer) Init() error {
-	m.initDatabase()
-	return nil
-}
-func (m *Memoizer) initDatabase() {
-}
-func (m *Memoizer) WriteEntry(n int, value int) {}
-func (m *Memoizer) ReadEntry()
 
 type Generator struct {
 }
@@ -33,13 +19,13 @@ func NewGenerator() *Generator {
 func (g Generator) Compute(n int) int {
 	log.Infof("Computing fibonacci sequence for ordinal %d...", n)
 
-	// TODO Check the cache here for a pre-computed result
 	switch {
 	case n == 0:
 		return 0
 	case n == 1:
 		return 1
 	case n > 1:
+		// TODO Check the cache here for a pre-computed result
 		return g.Compute(n-2) + g.Compute(n-1)
 	default:
 		return -1
