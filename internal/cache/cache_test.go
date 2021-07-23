@@ -11,8 +11,6 @@ func TestCreateCache(t *testing.T) {
 	defer func() {
 		assert.NoError(t, cache.Close())
 	}()
-	assert.NoError(t, cache.Init())
-	assert.Equal(t, true, cache.Initialized())
 }
 
 func TestReadWriteEntry(t *testing.T) {
@@ -20,19 +18,21 @@ func TestReadWriteEntry(t *testing.T) {
 	defer func() {
 		assert.NoError(t, cache.Close())
 	}()
-	assert.NoError(t, cache.Init())
 	// Test writing some entries
-	assert.NoError(t, cache.WriteEntry(&CacheEntry{Ordinal: 0, Result: 1}))
+	assert.NoError(t, cache.WriteEntry(&CacheEntry{Ordinal: 0, Result: 0}))
 	assert.NoError(t, cache.WriteEntry(&CacheEntry{Ordinal: 1, Result: 1}))
-	assert.NoError(t, cache.WriteEntry(&CacheEntry{Ordinal: 2, Result: 2}))
+	assert.NoError(t, cache.WriteEntry(&CacheEntry{Ordinal: 2, Result: 1}))
 	// Test reading the values back
 	res, err := cache.ReadEntry(0)
-	assert.EqualValues(t, &CacheEntry{Ordinal: 0, Result: 1}, res)
+	assert.Equal(t, 0, res.Ordinal)
+	assert.Equal(t, 0, res.Result)
 	assert.NoError(t, err)
 	res, err = cache.ReadEntry(1)
-	assert.EqualValues(t, &CacheEntry{Ordinal: 1, Result: 1}, res)
+	assert.Equal(t, 1, res.Ordinal)
+	assert.Equal(t, 1, res.Result)
 	assert.NoError(t, err)
 	res, err = cache.ReadEntry(2)
-	assert.EqualValues(t, &CacheEntry{Ordinal: 2, Result: 2}, res)
+	assert.Equal(t, 2, res.Ordinal)
+	assert.Equal(t, 1, res.Result)
 	assert.NoError(t, err)
 }
