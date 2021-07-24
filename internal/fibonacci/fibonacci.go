@@ -3,12 +3,14 @@
 package fibonacci
 
 import (
+	"strconv"
+
 	log "github.com/sirupsen/logrus"
 )
 
 type Memoizer interface {
-	Write(ordinal int, value int) error
-	Read(ordinal int) (int, error)
+	Write(ordinal int64, value int64) error
+	Read(ordinal int64) (int64, error)
 	Clear() error
 }
 
@@ -16,16 +18,26 @@ type Generator struct {
 	cache Memoizer
 }
 
+func NewGenerator(cache Memoizer) *Generator {
+	return &Generator{
+		cache: cache,
+	}
+}
+
 // ClearCache wipes the memoizer's Postgres DB
 func (g *Generator) ClearCache() error {
 	return g.cache.Clear()
 }
 
+func Int64ToString(v int64) string {
+	return strconv.FormatInt(v, 10)
+}
+
 // Compute Get the fibonacci value for the given ordinal
 // Defined as f(n) = f(n-2) + f(n-1) where f(0) = 0 and f(1) = 1
 // Returns -1 for invalid values
-func (g Generator) Compute(n int) int {
-	log.Debugf("Computing fibonacci sequence for ordinal=%d", n)
+func (g Generator) Compute(n int64) int64 {
+	log.Debugf("Computing fibonacci sequence for ordinal=%s", Int64ToString(n))
 
 	switch {
 	case n == 0:
@@ -44,7 +56,7 @@ func (g Generator) Compute(n int) int {
 
 // readCachedOrCompute will read a value from the database if it exists
 // otherwise it will compute the value and store it in the cache for future use
-func (g *Generator) readCachedOrCompute(ordinal int) int {
+func (g *Generator) readCachedOrCompute(ordinal int64) int64 {
 	value, err := g.cache.Read(ordinal)
 	if err != nil {
 		value = g.Compute(ordinal)

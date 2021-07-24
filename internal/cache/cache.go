@@ -2,6 +2,7 @@ package cache
 
 import (
 	"fmt"
+	"strconv"
 
 	log "github.com/sirupsen/logrus"
 	pg "gorm.io/driver/postgres"
@@ -10,12 +11,12 @@ import (
 
 type CacheEntry struct {
 	gorm.Model
-	Ordinal int `gorm:"uniqueIndex"` // The fibonacci ordinal N
-	Result  int // The fibonacci value
+	Ordinal int64 `gorm:"uniqueIndex"` // The fibonacci ordinal N
+	Value   int64 // The fibonacci value
 }
 
 func (c CacheEntry) String() string {
-	return fmt.Sprintf("CacheEntry<%d %d>", c.Ordinal, c.Result)
+	return fmt.Sprintf("CacheEntry<%s %s>", strconv.FormatInt(c.Ordinal, 10), strconv.FormatInt(c.Value, 10))
 }
 
 // Cache implements a PostgresDB cache for pre-computed ordinal values
@@ -25,11 +26,10 @@ type Cache struct {
 }
 
 // NewCache creates a new cache with persistent database connection
-func NewCache(user string, password string, addr string, database string) *Cache {
-	dsn := "postgres://fibo:averysecurepasswordshouldgohere@localhost:15432/fibo"
+func NewCache(dsn string) *Cache {
 	db, err := gorm.Open(pg.Open(dsn), &gorm.Config{})
 	if err != nil {
-		log.Panicf("Failed to connect to database: %e", err)
+		log.Errorf("Failed to connect to database: %e", err)
 	}
 	log.Info("Successfully connected to database.")
 	cache := &Cache{
@@ -37,7 +37,7 @@ func NewCache(user string, password string, addr string, database string) *Cache
 		initialized: false,
 	}
 	if err := cache.init(); err != nil {
-		log.Panicf("Failed to initialize the database: %e", err)
+		log.Errorf("Failed to initialize the database: %e", err)
 	}
 	return cache
 }
@@ -71,18 +71,27 @@ func (c *Cache) Close() error {
 	return db.Close()
 }
 
-func (c *Cache) WriteEntry(entry *CacheEntry) {
-	c.db.Create(entry)
-	log.Infof("Wrote cache entry for %s", entry)
+func (c *Cache) Clear() error {
+	return nil
 }
 
-func (c *Cache) ReadEntry(ordinal int) (*CacheEntry, error) {
-	value := new(CacheEntry)
-	result := c.db.Where("ordinal = ?", ordinal).First(value)
+func (c *Cache) Write(ordinal int64, value int64) error {
+	entry := &CacheEntry{
+		Ordinal: ordinal,
+		Value:   value,
+	}
+	c.db.Create(entry)
+	log.Infof("Wrote cache entry for %s", strconv.FormatInt(ordinal, 10))
+	return nil
+}
+
+func (c *Cache) Read(ordinal int64) (int64, error) {
+	entry := new(CacheEntry)
+	result := c.db.Where("ordinal = ?", ordinal).First(entry)
 	if result.Error != nil {
 		log.Warningf("Failed to retrieve cache entry: %v", result.Error)
-		return nil, result.Error
+		return -1, result.Error
 	}
-	log.Debugf("Successfully retrieved cached value for ordinal %d", ordinal)
-	return value, nil
+	log.Debugf("Successfully retrieved cached value for ordinal %s", strconv.FormatInt(ordinal, 10))
+	return entry.Value, nil
 }

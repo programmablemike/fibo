@@ -8,8 +8,8 @@ import (
 )
 
 var fibonacciTests = []struct {
-	Ordinal  int
-	Expected int
+	Ordinal  int64
+	Expected int64
 }{
 	{Ordinal: -2, Expected: -1},
 	{Ordinal: -1, Expected: -1},
@@ -44,11 +44,11 @@ func NewMockEmptyCache() *MockEmptyCache {
 	return &MockEmptyCache{}
 }
 
-func (me *MockEmptyCache) Read(ordinal int) (int, error) {
+func (me *MockEmptyCache) Read(ordinal int64) (int64, error) {
 	return -1, fmt.Errorf("Cache is empty")
 }
 
-func (me *MockEmptyCache) Write(ordinal int, value int) error {
+func (me *MockEmptyCache) Write(ordinal int64, value int64) error {
 	return nil
 }
 
@@ -57,22 +57,22 @@ func (me *MockEmptyCache) Clear() error {
 }
 
 type MockCache struct {
-	table map[int]int
+	table map[int64]int64
 }
 
-func NewMockCache(values map[int]int) *MockCache {
+func NewMockCache(values map[int64]int64) *MockCache {
 	if values == nil {
-		return &MockCache{table: make(map[int]int)}
+		return &MockCache{table: make(map[int64]int64)}
 	}
 	return &MockCache{table: values}
 }
 
-func (mc *MockCache) Write(ordinal int, value int) error {
+func (mc *MockCache) Write(ordinal int64, value int64) error {
 	mc.table[ordinal] = value
 	return nil
 }
 
-func (mc *MockCache) Read(ordinal int) (int, error) {
+func (mc *MockCache) Read(ordinal int64) (int64, error) {
 	if value, ok := mc.table[ordinal]; ok {
 		return value, nil
 	} else {
@@ -81,32 +81,26 @@ func (mc *MockCache) Read(ordinal int) (int, error) {
 }
 
 func (mc *MockCache) Clear() error {
-	mc.table = make(map[int]int)
+	mc.table = make(map[int64]int64)
 	return nil
 }
 
 func TestFibonacciNoCache(t *testing.T) {
-	g := Generator{
-		cache: NewMockEmptyCache(),
-	}
+	g := NewGenerator(NewMockEmptyCache())
 	for _, v := range fibonacciTests {
 		assert.Equal(t, v.Expected, g.Compute(v.Ordinal))
 	}
 }
 
 func TestFibonacciCached(t *testing.T) {
-	g := Generator{
-		cache: NewMockCache(nil),
-	}
+	g := NewGenerator(NewMockCache(nil))
 	for _, v := range fibonacciTests {
 		assert.Equal(t, v.Expected, g.Compute(v.Ordinal))
 	}
 }
 
 func BenchmarkFibonacciNoCache(b *testing.B) {
-	g := Generator{
-		cache: NewMockEmptyCache(),
-	}
+	g := NewGenerator(NewMockEmptyCache())
 	for i := 0; i < b.N; i++ {
 		for _, v := range fibonacciTests {
 			g.Compute(v.Ordinal)
@@ -115,9 +109,7 @@ func BenchmarkFibonacciNoCache(b *testing.B) {
 }
 
 func BenchmarkFibonacciCached(b *testing.B) {
-	g := Generator{
-		cache: NewMockCache(nil),
-	}
+	g := NewGenerator(NewMockCache(nil))
 	for i := 0; i < b.N; i++ {
 		for _, v := range fibonacciTests {
 			g.Compute(v.Ordinal)

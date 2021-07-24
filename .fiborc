@@ -1,0 +1,8 @@
+HOST = "localhost"
+PORT = 8080
+PGUSER = "fibo"
+PGPASSWORD = "averysecurepasswordshouldgohere"
+PGDB = "fibo"
+PGPORT = 15432
+PGHOST = "localhost"
+DEBUG = true
