@@ -51,7 +51,6 @@ func Uint64ToString(v uint64) string {
 // Compute Get the fibonacci value for the given ordinal
 // Defined as f(n) = f(n-2) + f(n-1) where f(0) = 0 and f(1) = 1
 // Returns -1 for invalid values
-// Note that this does not detect integer overflows which can occur quickly
 func (g Generator) Compute(n uint64) *Number {
 	log.Debugf("Computing fibonacci sequence for ordinal=%s", Uint64ToString(n))
 
