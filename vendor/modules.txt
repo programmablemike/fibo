@@ -1,5 +1,26 @@
+# github.com/Azure/go-ansiterm v0.0.0-20210617225240-d185dfc1b5a1
+## explicit
+github.com/Azure/go-ansiterm
+github.com/Azure/go-ansiterm/winterm
+# github.com/Microsoft/go-winio v0.5.0
+## explicit
+github.com/Microsoft/go-winio
+github.com/Microsoft/go-winio/pkg/guid
+# github.com/Nvveen/Gotty v0.0.0-20120604004816-cd527374f1e5
+## explicit
+github.com/Nvveen/Gotty
+# github.com/cenkalti/backoff v2.2.1+incompatible
+github.com/cenkalti/backoff
+# github.com/containerd/continuity v0.1.0
+## explicit
+github.com/containerd/continuity/pathdriver
 # github.com/davecgh/go-spew v1.1.1
 github.com/davecgh/go-spew/spew
+# github.com/docker/go-connections v0.4.0
+## explicit
+github.com/docker/go-connections/nat
+# github.com/docker/go-units v0.4.0
+github.com/docker/go-units
 # github.com/fsnotify/fsnotify v1.4.9
 github.com/fsnotify/fsnotify
 # github.com/gorilla/mux v1.8.0
@@ -43,8 +64,6 @@ github.com/jackc/pgx/v4/stdlib
 github.com/jinzhu/inflection
 # github.com/jinzhu/now v1.1.2
 github.com/jinzhu/now
-# github.com/konsorten/go-windows-terminal-sequences v1.0.2
-github.com/konsorten/go-windows-terminal-sequences
 # github.com/magiconair/properties v1.8.5
 github.com/magiconair/properties
 # github.com/mitchellh/go-homedir v1.1.0
@@ -54,11 +73,50 @@ github.com/mitchellh/go-homedir
 github.com/mitchellh/mapstructure
 # github.com/niemeyer/pretty v0.0.0-20200227124842-a10e7caefd8e
 ## explicit
+# github.com/opencontainers/go-digest v1.0.0
+github.com/opencontainers/go-digest
+# github.com/opencontainers/image-spec v1.0.1
+## explicit
+github.com/opencontainers/image-spec/specs-go
+github.com/opencontainers/image-spec/specs-go/v1
+# github.com/opencontainers/runc v1.0.1
+## explicit
+github.com/opencontainers/runc/libcontainer/user
+# github.com/ory/dockertest v3.3.5+incompatible
+## explicit
+github.com/ory/dockertest
+github.com/ory/dockertest/docker
+github.com/ory/dockertest/docker/opts
+github.com/ory/dockertest/docker/pkg/archive
+github.com/ory/dockertest/docker/pkg/fileutils
+github.com/ory/dockertest/docker/pkg/homedir
+github.com/ory/dockertest/docker/pkg/idtools
+github.com/ory/dockertest/docker/pkg/ioutils
+github.com/ory/dockertest/docker/pkg/jsonmessage
+github.com/ory/dockertest/docker/pkg/longpath
+github.com/ory/dockertest/docker/pkg/mount
+github.com/ory/dockertest/docker/pkg/pools
+github.com/ory/dockertest/docker/pkg/stdcopy
+github.com/ory/dockertest/docker/pkg/system
+github.com/ory/dockertest/docker/pkg/term
+github.com/ory/dockertest/docker/pkg/term/windows
+github.com/ory/dockertest/docker/types
+github.com/ory/dockertest/docker/types/blkiodev
+github.com/ory/dockertest/docker/types/container
+github.com/ory/dockertest/docker/types/filters
+github.com/ory/dockertest/docker/types/mount
+github.com/ory/dockertest/docker/types/network
+github.com/ory/dockertest/docker/types/registry
+github.com/ory/dockertest/docker/types/strslice
+github.com/ory/dockertest/docker/types/versions
 # github.com/pelletier/go-toml v1.9.3
 github.com/pelletier/go-toml
+# github.com/pkg/errors v0.9.1
+## explicit
+github.com/pkg/errors
 # github.com/pmezard/go-difflib v1.0.0
 github.com/pmezard/go-difflib/difflib
-# github.com/sirupsen/logrus v1.4.2
+# github.com/sirupsen/logrus v1.8.1
 ## explicit
 github.com/sirupsen/logrus
 # github.com/spf13/afero v1.6.0
@@ -83,10 +141,13 @@ github.com/stretchr/testify/assert
 github.com/subosito/gotenv
 # golang.org/x/crypto v0.0.0-20210616213533-5ff15b29337e
 golang.org/x/crypto/pbkdf2
+# golang.org/x/net v0.0.0-20210405180319-a5a99cb37ef4
+golang.org/x/net/context
 # golang.org/x/sys v0.0.0-20210630005230-0f9fa26af87c
 ## explicit
 golang.org/x/sys/internal/unsafeheader
 golang.org/x/sys/unix
+golang.org/x/sys/windows
 # golang.org/x/text v0.3.6
 golang.org/x/text/cases
 golang.org/x/text/internal

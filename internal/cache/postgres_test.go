@@ -1,21 +1,44 @@
 package cache
 
 import (
+	"log"
 	"testing"
 
+	"github.com/ory/dockertest"
 	"github.com/programmablemike/fibo/internal/fibonacci"
 	"github.com/stretchr/testify/assert"
 )
 
+var database string = "fibo_test"
+var connString = "postgres://postgres:secret@localhost:5432/fibo_test"
+
+func TestMain(m *testing.M) {
+	pool, err := dockertest.NewPool("")
+
+	if err != nil {
+		log.Fatalf("Could not connect to docker: %s", err)
+	}
+
+	resource, err := pool.Run("postgres", "9.6", []string{"POSTGRES_PASSWORD=secret", "POSTGRES_DB=" + database})
+	if err != nil {
+		log.Fatalf("Could not start resource: %s", err)
+	}
+
+	// When you're done, kill and remove the container
+	if err = pool.Purge(resource); err != nil {
+		log.Fatalf("Could not purge resource: %s", err)
+	}
+}
+
 func TestCreateCache(t *testing.T) {
-	cache := NewCache("postgres://fibo:averysecurepasswordshouldgohere@localhost:15432/fibo")
+	cache := NewCache(connString)
 	defer func() {
 		assert.NoError(t, cache.Close())
 	}()
 }
 
 func TestReadWriteEntry(t *testing.T) {
-	cache := NewCache("postgres://fibo:averysecurepasswordshouldgohere@localhost:15432/fibo")
+	cache := NewCache(connString)
 	defer func() {
 		assert.NoError(t, cache.Close())
 	}()
