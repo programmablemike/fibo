@@ -105,6 +105,14 @@ func TestFibonacciLargeValue(t *testing.T) {
 	assert.Equal(t, v, g.Compute(ord))
 }
 
+func TestFibonacciVeryLargeValue(t *testing.T) {
+	g := NewGenerator(NewMemoryCache(nil))
+	ord := uint64(1000)
+	v, _ := NewNumberFromDecimalString("43466557686937456435688527675040625802564660517371780402481729089536555417949051890403879840079255169295922593080322634775209689623239873322471161642996440906533187938298969649928516003704476137795166849228875")
+
+	assert.Equal(t, v, g.Compute(ord))
+}
+
 func BenchmarkFibonacciNoCache(b *testing.B) {
 	g := NewGenerator(NewMockEmptyCache())
 	for i := 0; i < b.N; i++ {

@@ -62,7 +62,6 @@ func (g Generator) Compute(n uint64) *Number {
 	case n == 1:
 		return NewNumber(1)
 	case n > 1:
-		// @TODO: Insert caching logic here
 		n1 := g.readCachedOrCompute(n - 1)
 		n2 := g.readCachedOrCompute(n - 2)
 		res := NewNumber(0) // math.big requires a target to contain the result
