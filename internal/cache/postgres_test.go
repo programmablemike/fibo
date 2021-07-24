@@ -1,16 +1,20 @@
 package cache
 
 import (
+	"fmt"
 	"log"
+	"os"
 	"testing"
 
 	"github.com/ory/dockertest"
 	"github.com/programmablemike/fibo/internal/fibonacci"
 	"github.com/stretchr/testify/assert"
+	pg "gorm.io/driver/postgres"
+	gorm "gorm.io/gorm"
 )
 
 var database string = "fibo_test"
-var connString = "postgres://postgres:secret@localhost:5432/fibo_test"
+var connString string
 
 func TestMain(m *testing.M) {
 	pool, err := dockertest.NewPool("")
@@ -23,11 +27,28 @@ func TestMain(m *testing.M) {
 	if err != nil {
 		log.Fatalf("Could not start resource: %s", err)
 	}
+	defer func() {
+		// Purge the container
+		if err = pool.Purge(resource); err != nil {
+			log.Fatalf("Could not purge resource: %s", err)
+		}
+	}()
 
-	// When you're done, kill and remove the container
-	if err = pool.Purge(resource); err != nil {
-		log.Fatalf("Could not purge resource: %s", err)
+	// exponential backoff-retry, because the application in the container might not be ready to accept connections yet
+	connString = fmt.Sprintf("postgres://postgres:secret@localhost:%s/%s", resource.GetPort("5432/tcp"), database)
+	if err := pool.Retry(func() error {
+		_, err := gorm.Open(pg.Open(connString), &gorm.Config{})
+		if err != nil {
+			return err
+		}
+		return nil
+	}); err != nil {
+		log.Fatalf("Could not connect to docker: %s", err)
 	}
+
+	// Run the test
+	retCode := m.Run()
+	os.Exit(retCode)
 }
 
 func TestCreateCache(t *testing.T) {

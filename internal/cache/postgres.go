@@ -29,6 +29,7 @@ type Cache struct {
 
 // NewCache creates a new cache with persistent database connection
 func NewCache(dsn string) *Cache {
+	log.Debugf("Connecting to postgres with DSN=%s", dsn)
 	db, err := gorm.Open(pg.Open(dsn), &gorm.Config{})
 	if err != nil {
 		log.Errorf("Failed to connect to database: %s", err)
