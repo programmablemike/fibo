@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strconv"
 
+	"github.com/programmablemike/fibo/internal/fibonacci"
 	log "github.com/sirupsen/logrus"
 	pg "gorm.io/driver/postgres"
 	gorm "gorm.io/gorm"
@@ -12,11 +13,11 @@ import (
 type CacheEntry struct {
 	gorm.Model
 	Ordinal uint64 `gorm:"uniqueIndex"` // The fibonacci ordinal N
-	Value   uint64 // The fibonacci value
+	Value   string // The fibonacci value - we use string to represent arbitrary precision
 }
 
 func (c CacheEntry) String() string {
-	return fmt.Sprintf("CacheEntry<%s %s>", strconv.FormatUint(c.Ordinal, 10), strconv.FormatUint(c.Value, 10))
+	return fmt.Sprintf("CacheEntry<%s %s>", strconv.FormatUint(c.Ordinal, 10), c.Value)
 }
 
 // Cache implements a PostgresDB cache for pre-computed ordinal values
@@ -75,23 +76,29 @@ func (c *Cache) Clear() error {
 	return nil
 }
 
-func (c *Cache) Write(ordinal uint64, value uint64) error {
+func (c *Cache) Write(ordinal uint64, value *fibonacci.Number) error {
 	entry := &CacheEntry{
 		Ordinal: ordinal,
-		Value:   value,
+		Value:   value.String(),
 	}
 	c.db.Create(entry)
 	log.Infof("Wrote cache entry for %s", strconv.FormatUint(ordinal, 10))
 	return nil
 }
 
-func (c *Cache) Read(ordinal uint64) (uint64, error) {
+func (c *Cache) Read(ordinal uint64) (*fibonacci.Number, error) {
 	entry := new(CacheEntry)
 	result := c.db.Where("ordinal = ?", ordinal).First(entry)
 	if result.Error != nil {
 		log.Warningf("Failed to retrieve cache entry: %v", result.Error)
-		return 0, result.Error
+		return fibonacci.NewNumber(-1), result.Error
 	}
 	log.Debugf("Successfully retrieved cached value for ordinal %s", strconv.FormatUint(ordinal, 10))
-	return entry.Value, nil
+	v, ok := fibonacci.NewNumberFromDecimalString(entry.Value)
+	if !ok {
+		err := fmt.Errorf("failed to convert %s to a fibonacci.Number", entry.Value)
+		log.Error(err)
+		return fibonacci.NewNumber(-1), err
+	}
+	return v, nil
 }

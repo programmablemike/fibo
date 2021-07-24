@@ -62,7 +62,7 @@ func NewRouter() *mux.Router {
 		res := GenericResponse{
 			Status:  StatusOK,
 			Message: "",
-			Value:   fibonacci.Uint64ToString(value),
+			Value:   value.String(),
 		}
 		w.WriteHeader(http.StatusOK)
 		json.NewEncoder(w).Encode(res)
@@ -121,7 +121,7 @@ func NewRouter() *mux.Router {
 		res := GenericResponse{
 			Status:  StatusOK,
 			Message: "",
-			Value:   fibonacci.Uint64ToString(value),
+			Value:   value.String(),
 		}
 		w.WriteHeader(http.StatusOK)
 		json.NewEncoder(w).Encode(res)
