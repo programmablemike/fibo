@@ -8,11 +8,9 @@ import (
 )
 
 var fibonacciTests = []struct {
-	Ordinal  int64
-	Expected int64
+	Ordinal  uint64
+	Expected uint64
 }{
-	{Ordinal: -2, Expected: -1},
-	{Ordinal: -1, Expected: -1},
 	{Ordinal: 0, Expected: 0},
 	{Ordinal: 1, Expected: 1},
 	{Ordinal: 2, Expected: 1},
@@ -34,6 +32,7 @@ var fibonacciTests = []struct {
 	{Ordinal: 18, Expected: 2584},
 	{Ordinal: 19, Expected: 4181},
 	{Ordinal: 20, Expected: 6765},
+	{Ordinal: 100, Expected: 354224848179261915075},
 }
 
 // Always behaves like the cache is empty
@@ -44,11 +43,11 @@ func NewMockEmptyCache() *MockEmptyCache {
 	return &MockEmptyCache{}
 }
 
-func (me *MockEmptyCache) Read(ordinal int64) (int64, error) {
-	return -1, fmt.Errorf("Cache is empty")
+func (me *MockEmptyCache) Read(ordinal uint64) (uint64, error) {
+	return 0, fmt.Errorf("Cache is empty")
 }
 
-func (me *MockEmptyCache) Write(ordinal int64, value int64) error {
+func (me *MockEmptyCache) Write(ordinal uint64, value uint64) error {
 	return nil
 }
 
@@ -57,31 +56,31 @@ func (me *MockEmptyCache) Clear() error {
 }
 
 type MockCache struct {
-	table map[int64]int64
+	table map[uint64]uint64
 }
 
-func NewMockCache(values map[int64]int64) *MockCache {
+func NewMockCache(values map[uint64]uint64) *MockCache {
 	if values == nil {
-		return &MockCache{table: make(map[int64]int64)}
+		return &MockCache{table: make(map[uint64]uint64)}
 	}
 	return &MockCache{table: values}
 }
 
-func (mc *MockCache) Write(ordinal int64, value int64) error {
+func (mc *MockCache) Write(ordinal uint64, value uint64) error {
 	mc.table[ordinal] = value
 	return nil
 }
 
-func (mc *MockCache) Read(ordinal int64) (int64, error) {
+func (mc *MockCache) Read(ordinal uint64) (uint64, error) {
 	if value, ok := mc.table[ordinal]; ok {
 		return value, nil
 	} else {
-		return -1, fmt.Errorf("Value not in map")
+		return 0, fmt.Errorf("Value not in map")
 	}
 }
 
 func (mc *MockCache) Clear() error {
-	mc.table = make(map[int64]int64)
+	mc.table = make(map[uint64]uint64)
 	return nil
 }
 

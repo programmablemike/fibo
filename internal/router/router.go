@@ -48,7 +48,7 @@ func NewRouter() *mux.Router {
 			viper.GetString("pgdb"),
 		)
 		gen := fibonacci.NewGenerator(cache.NewCache(dsn))
-		ord, err := strconv.ParseInt(vars["ordinal"], 10, 64)
+		ord, err := strconv.ParseUint(vars["ordinal"], 10, 64)
 		if err != nil {
 			res := GenericResponse{
 				Status:  StatusError,
@@ -58,11 +58,11 @@ func NewRouter() *mux.Router {
 			json.NewEncoder(w).Encode(res)
 			return
 		}
-		value := gen.Compute(int64(ord))
+		value := gen.Compute(uint64(ord))
 		res := GenericResponse{
 			Status:  StatusOK,
 			Message: "",
-			Value:   fibonacci.Int64ToString(value),
+			Value:   fibonacci.Uint64ToString(value),
 		}
 		w.WriteHeader(http.StatusOK)
 		json.NewEncoder(w).Encode(res)
@@ -107,7 +107,7 @@ func NewRouter() *mux.Router {
 			viper.GetString("pgdb"),
 		)
 		gen := fibonacci.NewGenerator(cache.NewCache(dsn))
-		ord, err := strconv.ParseInt(vars["ordinal"], 10, 64)
+		ord, err := strconv.ParseUint(vars["ordinal"], 10, 64)
 		if err != nil {
 			res := GenericResponse{
 				Status:  StatusError,
@@ -117,11 +117,11 @@ func NewRouter() *mux.Router {
 			json.NewEncoder(w).Encode(res)
 			return
 		}
-		value := gen.Compute(int64(ord))
+		value := gen.Compute(uint64(ord))
 		res := GenericResponse{
 			Status:  StatusOK,
 			Message: "",
-			Value:   fibonacci.Int64ToString(value),
+			Value:   fibonacci.Uint64ToString(value),
 		}
 		w.WriteHeader(http.StatusOK)
 		json.NewEncoder(w).Encode(res)
