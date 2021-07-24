@@ -34,10 +34,10 @@ The web API should expose operations to:
 
 The web API:
 - [x] must be written in Go
-- [ ] Postgres must be used as the data store for the memoized results.
+- [x] Postgres must be used as the data store for the memoized results.
 
 Please include:
-- [ ] tests for your solution, and
+- [x] tests for your solution, and
 - [ ] a README.md describing how to build and run it.
 
 Bonus points:

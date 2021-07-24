@@ -40,13 +40,7 @@ func NewRouter() *mux.Router {
 	r.HandleFunc("/fibo/{ordinal}", func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
 
-		dsn := fmt.Sprintf("postgres://%s:%s@%s:%d/%s",
-			viper.GetString("pguser"),
-			viper.GetString("pgpassword"),
-			viper.GetString("pghost"),
-			viper.GetInt("pgport"),
-			viper.GetString("pgdb"),
-		)
+		dsn := createDsnFromConfig()
 		gen := fibonacci.NewGenerator(cache.NewCache(dsn))
 		ord, err := strconv.ParseUint(vars["ordinal"], 10, 64)
 		if err != nil {
@@ -69,13 +63,7 @@ func NewRouter() *mux.Router {
 	}).Methods("GET")
 
 	r.HandleFunc("/fibo/cache", func(w http.ResponseWriter, r *http.Request) {
-		dsn := fmt.Sprintf("postgres://%s:%s@%s:%d/%s",
-			viper.GetString("pguser"),
-			viper.GetString("pgpassword"),
-			viper.GetString("pghost"),
-			viper.GetInt("pgport"),
-			viper.GetString("pgdb"),
-		)
+		dsn := createDsnFromConfig()
 		gen := fibonacci.NewGenerator(cache.NewCache(dsn))
 		err := gen.ClearCache()
 		if err != nil {
@@ -99,13 +87,7 @@ func NewRouter() *mux.Router {
 	r.HandleFunc("/fibo/{ordinal}/count", func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
 
-		dsn := fmt.Sprintf("postgres://%s:%s@%s:%d/%s",
-			viper.GetString("pguser"),
-			viper.GetString("pgpassword"),
-			viper.GetString("pghost"),
-			viper.GetInt("pgport"),
-			viper.GetString("pgdb"),
-		)
+		dsn := createDsnFromConfig()
 		gen := fibonacci.NewGenerator(cache.NewCache(dsn))
 		ord, err := strconv.ParseUint(vars["ordinal"], 10, 64)
 		if err != nil {
@@ -128,4 +110,17 @@ func NewRouter() *mux.Router {
 	}).Methods("GET")
 
 	return r
+}
+
+// createDsnFromConfig converts the options in the CLI flags/environment/.fiborc into a Postgres
+// connection string
+func createDsnFromConfig() string {
+	dsn := fmt.Sprintf("postgres://%s:%s@%s:%d/%s",
+		viper.GetString("pguser"),
+		viper.GetString("pgpassword"),
+		viper.GetString("pghost"),
+		viper.GetInt("pgport"),
+		viper.GetString("pgdb"),
+	)
+	return dsn
 }
