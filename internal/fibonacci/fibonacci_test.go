@@ -3,7 +3,6 @@ package fibonacci
 import (
 	"testing"
 
-	"github.com/programmablemike/fibo/internal/cache"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -28,18 +27,8 @@ var fibonacciTests = []struct {
 	{Ordinal: 12, Expected: 144},
 }
 
-/*
 func TestFibonacciOkNoCache(t *testing.T) {
 	g := Generator{}
-	for _, v := range fibonacciTests {
-		assert.Equal(t, v.Expected, g.Compute(v.Ordinal))
-	}
-}
-*/
-
-func TestFibonacciOkCached(t *testing.T) {
-	c := cache.NewCache("fibo", "averysecurepasswordshouldgohere", "localhost:15432", "fibo")
-	g := Generator{cache: c}
 	for _, v := range fibonacciTests {
 		assert.Equal(t, v.Expected, g.Compute(v.Ordinal))
 	}

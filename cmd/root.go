@@ -5,14 +5,13 @@ import (
 	"os"
 
 	homedir "github.com/mitchellh/go-homedir"
+	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
 
 var (
-	cfgFile     = ""
-	projectBase = ""
-	userLicense = ""
+	cfgFile = ""
 )
 
 var rootCmd = &cobra.Command{
@@ -35,19 +34,22 @@ func Execute() {
 
 func init() {
 	cobra.OnInitialize(initConfig)
-	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.cobra.yaml)")
-	rootCmd.PersistentFlags().StringVarP(&projectBase, "projectbase", "b", "", "base project directory eg. github.com/spf13/")
-	rootCmd.PersistentFlags().StringP("author", "a", "YOUR NAME", "Author name for copyright attribution")
-	rootCmd.PersistentFlags().StringVarP(&userLicense, "license", "l", "", "Name of license for the project (can provide `licensetext` in config)")
-	rootCmd.PersistentFlags().Bool("viper", true, "Use Viper for configuration")
-	viper.BindPFlag("author", rootCmd.PersistentFlags().Lookup("author"))
-	viper.BindPFlag("projectbase", rootCmd.PersistentFlags().Lookup("projectbase"))
+	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.fibo.yaml)")
+	rootCmd.PersistentFlags().Bool("debug", false, "Turns on debugging mode")
 	viper.BindPFlag("useViper", rootCmd.PersistentFlags().Lookup("viper"))
-	viper.SetDefault("author", "NAME HERE <EMAIL ADDRESS>")
-	viper.SetDefault("license", "apache")
+	viper.BindPFlag("debug", rootCmd.PersistentFlags().Lookup("debug"))
 }
 
 func initConfig() {
+	// Config file name (without extension - valid extensions are .yaml, .toml, .json, etc.)
+	viper.SetConfigName(".fiborc")
+	// Default configuration type when extension is missing
+	viper.SetConfigType("toml")
+	// Prefix for environment variables (ex. FIBO_POSTGRES_USER)
+	viper.SetEnvPrefix("fibo")
+	// Automatically source environment variables
+	viper.AutomaticEnv()
+
 	// Don't forget to read config either from cfgFile or from home directory!
 	if cfgFile != "" {
 		// Use config file from the flag.
@@ -59,14 +61,28 @@ func initConfig() {
 			fmt.Println(err)
 			os.Exit(1)
 		}
+		// Find the current working directory
+		cwd, err := os.Getwd()
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
 
-		// Search config in home directory with name ".cobra" (without extension).
+		// Search the home directory
 		viper.AddConfigPath(home)
-		viper.SetConfigName(".cobra")
+		// Search the current working directory
+		viper.AddConfigPath(cwd)
 	}
 
 	if err := viper.ReadInConfig(); err != nil {
 		fmt.Println("Can't read config:", err)
 		os.Exit(1)
+	}
+
+	// Turn on debug is toggled
+	if viper.GetBool("debug") {
+		log.SetLevel(log.DebugLevel)
+	} else {
+		log.SetLevel(log.InfoLevel)
 	}
 }
