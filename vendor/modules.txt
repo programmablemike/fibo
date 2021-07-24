@@ -26,6 +26,8 @@ github.com/fsnotify/fsnotify
 # github.com/gorilla/mux v1.8.0
 ## explicit
 github.com/gorilla/mux
+# github.com/gotestyourself/gotestyourself v2.2.0+incompatible
+## explicit
 # github.com/hashicorp/hcl v1.0.0
 github.com/hashicorp/hcl
 github.com/hashicorp/hcl/hcl/ast
@@ -112,7 +114,6 @@ github.com/ory/dockertest/docker/types/versions
 # github.com/pelletier/go-toml v1.9.3
 github.com/pelletier/go-toml
 # github.com/pkg/errors v0.9.1
-## explicit
 github.com/pkg/errors
 # github.com/pmezard/go-difflib v1.0.0
 github.com/pmezard/go-difflib/difflib
@@ -182,3 +183,5 @@ gorm.io/gorm/logger
 gorm.io/gorm/migrator
 gorm.io/gorm/schema
 gorm.io/gorm/utils
+# gotest.tools v2.2.0+incompatible
+## explicit

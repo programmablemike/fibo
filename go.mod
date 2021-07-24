@@ -9,13 +9,13 @@ require (
 	github.com/containerd/continuity v0.1.0 // indirect
 	github.com/docker/go-connections v0.4.0 // indirect
 	github.com/gorilla/mux v1.8.0
+	github.com/gotestyourself/gotestyourself v2.2.0+incompatible // indirect
 	github.com/jackc/pgx/v4 v4.12.0 // indirect
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/niemeyer/pretty v0.0.0-20200227124842-a10e7caefd8e // indirect
 	github.com/opencontainers/image-spec v1.0.1 // indirect
 	github.com/opencontainers/runc v1.0.1 // indirect
 	github.com/ory/dockertest v3.3.5+incompatible
-	github.com/pkg/errors v0.9.1 // indirect
 	github.com/sirupsen/logrus v1.8.1
 	github.com/spf13/cobra v1.2.1
 	github.com/spf13/viper v1.8.1
@@ -24,4 +24,5 @@ require (
 	gopkg.in/check.v1 v1.0.0-20200227125254-8fa46927fb4f // indirect
 	gorm.io/driver/postgres v1.1.0
 	gorm.io/gorm v1.21.12
+	gotest.tools v2.2.0+incompatible // indirect
 )
