@@ -34,7 +34,7 @@ var fibonacciTests = []struct {
 	{Ordinal: 20, Expected: NewNumber(6765)},
 }
 
-// Always behaves like the cache is empty
+// MockEmptyCache always behaves like the cache is empty
 type MockEmptyCache struct {
 }
 
@@ -54,6 +54,8 @@ func (me *MockEmptyCache) Clear() error {
 	return nil
 }
 
+// MemoryCache is a naive in-memory cache implementation
+// It is *not* goroutine safe
 type MemoryCache struct {
 	table map[uint64]*Number
 }
