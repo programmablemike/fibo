@@ -15,3 +15,4 @@ FROM ubuntu:20.04
 ARG GOOS
 ARG GOARCH
 COPY --from=builder /go/src/app/fibo_${GOOS}_${GOARCH} /usr/bin/fibo
+CMD ["fibo", "server"]

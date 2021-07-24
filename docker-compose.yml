@@ -4,11 +4,14 @@ services:
     build: .
     links:
       - postgres
+    ports:
+      - 8080:8080
     environment:
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB: ${POSTGRES_DB}
-      POSTGRES_HOST: postgres
+      FIBO_PGUSER: ${POSTGRES_USER}
+      FIBO_PGPASSWORD: ${POSTGRES_PASSWORD}
+      FIBO_PGHOST: postgres
+      FIBO_PGPORT: 5432
+      FIBO_PGDB: ${POSTGRES_DB}
   postgres:
     image: postgres:${POSTGRES_VERSION}
     restart: always

@@ -75,8 +75,8 @@ func initConfig() {
 	}
 
 	if err := viper.ReadInConfig(); err != nil {
-		fmt.Println("Can't read config:", err)
-		os.Exit(1)
+		fmt.Println("Can't find config:", err)
+		fmt.Println("Falling back to command-line defaults.")
 	}
 
 	// Turn on debug is toggled

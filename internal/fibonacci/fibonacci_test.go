@@ -32,7 +32,6 @@ var fibonacciTests = []struct {
 	{Ordinal: 18, Expected: 2584},
 	{Ordinal: 19, Expected: 4181},
 	{Ordinal: 20, Expected: 6765},
-	{Ordinal: 100, Expected: 354224848179261915075},
 }
 
 // Always behaves like the cache is empty
