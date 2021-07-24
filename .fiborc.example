@@ -1,0 +1,5 @@
+POSTGRES_USER = "fibo"
+POSTGRES_PASSWORD = "averystrongpasswordshouldgohere"
+POSTGRES_DATABASE = "fibo"
+POSTGRES_PORT = 15432
+POSTGRES_HOST = "localhost"
