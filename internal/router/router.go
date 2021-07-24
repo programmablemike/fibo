@@ -59,6 +59,26 @@ func NewRouter() *mux.Router {
 		json.NewEncoder(w).Encode(res)
 	}).Methods("GET")
 
+	r.HandleFunc("/fibo/cache", func(w http.ResponseWriter, r *http.Request) {
+		gen := fibonacci.Generator{}
+		err := gen.ClearCache()
+		if err != nil {
+			res := GenericResponse{
+				Status:  StatusError,
+				Message: fmt.Sprintf("%e", err),
+			}
+			w.WriteHeader(http.StatusInternalServerError)
+			json.NewEncoder(w).Encode(res)
+			return
+		}
+		res := GenericResponse{
+			Status:  StatusOK,
+			Message: "Cache cleared",
+		}
+		w.WriteHeader(http.StatusOK)
+		json.NewEncoder(w).Encode(res)
+	}).Methods("DELETE")
+
 	// Step counter
 	r.HandleFunc("/fibo/{ordinal}/count", func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
