@@ -1,3 +1,4 @@
+// Implements an intermediate cache of Fibonacci values using Postgres
 package cache
 
 import (
@@ -30,7 +31,7 @@ type Cache struct {
 func NewCache(dsn string) *Cache {
 	db, err := gorm.Open(pg.Open(dsn), &gorm.Config{})
 	if err != nil {
-		log.Errorf("Failed to connect to database: %e", err)
+		log.Errorf("Failed to connect to database: %s", err)
 	}
 	log.Info("Successfully connected to database.")
 	cache := &Cache{
@@ -38,7 +39,7 @@ func NewCache(dsn string) *Cache {
 		initialized: false,
 	}
 	if err := cache.init(); err != nil {
-		log.Errorf("Failed to initialize the database: %e", err)
+		log.Errorf("Failed to initialize the database: %s", err)
 	}
 	return cache
 }
@@ -82,7 +83,7 @@ func (c *Cache) Write(ordinal uint64, value *fibonacci.Number) error {
 		Value:   value.String(),
 	}
 	c.db.Create(entry)
-	log.Infof("Wrote cache entry for %s", strconv.FormatUint(ordinal, 10))
+	log.Infof("Wrote cache entry for ordinal=%s", strconv.FormatUint(ordinal, 10))
 	return nil
 }
 
@@ -90,13 +91,13 @@ func (c *Cache) Read(ordinal uint64) (*fibonacci.Number, error) {
 	entry := new(CacheEntry)
 	result := c.db.Where("ordinal = ?", ordinal).First(entry)
 	if result.Error != nil {
-		log.Warningf("Failed to retrieve cache entry: %v", result.Error)
+		log.Warningf("Failed to retrieve cache entry for ordinal=%s: %v", strconv.FormatUint(ordinal, 10), result.Error)
 		return fibonacci.NewNumber(-1), result.Error
 	}
-	log.Debugf("Successfully retrieved cached value for ordinal %s", strconv.FormatUint(ordinal, 10))
+	log.Debugf("Successfully retrieved cached value for ordinal=%s", strconv.FormatUint(ordinal, 10))
 	v, ok := fibonacci.NewNumberFromDecimalString(entry.Value)
 	if !ok {
-		err := fmt.Errorf("failed to convert %s to a fibonacci.Number", entry.Value)
+		err := fmt.Errorf("failed to convert %s to a *fibonacci.Number", entry.Value)
 		log.Error(err)
 		return fibonacci.NewNumber(-1), err
 	}

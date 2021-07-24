@@ -1,3 +1,4 @@
+// The main HTTP router for the fibo server
 package router
 
 import (
@@ -46,7 +47,7 @@ func NewRouter() *mux.Router {
 		if err != nil {
 			res := GenericResponse{
 				Status:  StatusError,
-				Message: fmt.Sprintf("%e", err),
+				Message: "failed to parse ordinal value",
 			}
 			w.WriteHeader(http.StatusBadRequest)
 			json.NewEncoder(w).Encode(res)
@@ -93,7 +94,7 @@ func NewRouter() *mux.Router {
 		if err != nil {
 			res := GenericResponse{
 				Status:  StatusError,
-				Message: fmt.Sprintf("%e", err),
+				Message: "failed to parse ordinal value",
 			}
 			w.WriteHeader(http.StatusBadRequest)
 			json.NewEncoder(w).Encode(res)
