@@ -8,7 +8,6 @@ import (
 	"strconv"
 
 	"github.com/gorilla/mux"
-	"github.com/programmablemike/fibo/internal/cache"
 	"github.com/programmablemike/fibo/internal/fibonacci"
 	"github.com/spf13/viper"
 )
@@ -24,7 +23,7 @@ const (
 	StatusError string = "ERROR"
 )
 
-func NewRouter() *mux.Router {
+func NewRouter(gen *fibonacci.Generator) *mux.Router {
 	r := mux.NewRouter()
 
 	// Root handler
@@ -41,8 +40,6 @@ func NewRouter() *mux.Router {
 	r.HandleFunc("/fibo/{ordinal}", func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
 
-		dsn := createDsnFromConfig()
-		gen := fibonacci.NewGenerator(cache.NewCache(dsn))
 		ord, err := strconv.ParseUint(vars["ordinal"], 10, 64)
 		if err != nil {
 			res := GenericResponse{
@@ -53,7 +50,7 @@ func NewRouter() *mux.Router {
 			json.NewEncoder(w).Encode(res)
 			return
 		}
-		value := gen.Compute(uint64(ord))
+		value := gen.Compute(ord)
 		res := GenericResponse{
 			Status:  StatusOK,
 			Message: "",
@@ -64,8 +61,6 @@ func NewRouter() *mux.Router {
 	}).Methods("GET")
 
 	r.HandleFunc("/fibo/cache", func(w http.ResponseWriter, r *http.Request) {
-		dsn := createDsnFromConfig()
-		gen := fibonacci.NewGenerator(cache.NewCache(dsn))
 		err := gen.ClearCache()
 		if err != nil {
 			res := GenericResponse{
@@ -88,8 +83,6 @@ func NewRouter() *mux.Router {
 	r.HandleFunc("/fibo/{ordinal}/count", func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
 
-		dsn := createDsnFromConfig()
-		gen := fibonacci.NewGenerator(cache.NewCache(dsn))
 		ord, err := strconv.ParseUint(vars["ordinal"], 10, 64)
 		if err != nil {
 			res := GenericResponse{
@@ -100,7 +93,7 @@ func NewRouter() *mux.Router {
 			json.NewEncoder(w).Encode(res)
 			return
 		}
-		value := gen.Compute(uint64(ord))
+		value := gen.Compute(ord)
 		res := GenericResponse{
 			Status:  StatusOK,
 			Message: "",

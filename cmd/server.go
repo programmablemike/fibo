@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/programmablemike/fibo/internal/cache"
+	"github.com/programmablemike/fibo/internal/fibonacci"
 	"github.com/programmablemike/fibo/internal/router"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -11,7 +13,7 @@ import (
 )
 
 func init() {
-	serverCmd.PersistentFlags().String("host", "localhost", "HTTP server hostname to bind (default: localhost)")
+	serverCmd.PersistentFlags().String("host", "", "HTTP server hostname to bind (default: *)")
 	serverCmd.PersistentFlags().Int("port", 8080, "HTTP server port to bind (default: 8080)")
 	serverCmd.PersistentFlags().String("pguser", "fibo", "Postgres database user (default: fibo)")
 	serverCmd.PersistentFlags().String("pgpassword", "", "Postgres database password (default: \"\")")
@@ -28,6 +30,19 @@ func init() {
 	rootCmd.AddCommand(serverCmd)
 }
 
+// createDsnFromConfig converts the options in the CLI flags/environment/.fiborc into a Postgres
+// connection string
+func createDsnFromConfig() string {
+	dsn := fmt.Sprintf("postgres://%s:%s@%s:%d/%s",
+		viper.GetString("pguser"),
+		viper.GetString("pgpassword"),
+		viper.GetString("pghost"),
+		viper.GetInt("pgport"),
+		viper.GetString("pgdb"),
+	)
+	return dsn
+}
+
 var serverCmd = &cobra.Command{
 	Use:   "server",
 	Short: "Run the API server for memoized Fibonacci generation",
@@ -41,7 +56,10 @@ var serverCmd = &cobra.Command{
 		log.Debugf("pgport: %s", viper.GetString("pgport"))
 		log.Debugf("pgdb: %s", viper.GetString("pgdb"))
 
-		r := router.NewRouter()
+		dsn := createDsnFromConfig()
+		c := cache.NewCache(dsn)
+		gen := fibonacci.NewGenerator(c)
+		r := router.NewRouter(gen)
 		addr := fmt.Sprintf("%s:%d", viper.GetString("host"), viper.GetInt("port"))
 		log.Info("Started server at ", addr)
 		http.ListenAndServe(addr, r)

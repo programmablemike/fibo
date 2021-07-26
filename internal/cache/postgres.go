@@ -3,6 +3,7 @@ package cache
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/programmablemike/fibo/internal/fibonacci"
 	log "github.com/sirupsen/logrus"
@@ -51,12 +52,40 @@ func (c *Cache) init() error {
 		log.Warning("Cannot re-initiliaze the database... skipping.")
 		return nil
 	}
+	if err := c.initWaitForDatabase(); err != nil {
+		log.Fatal("Timed out while waiting for database to become available")
+	}
 	if err := c.initTables(); err != nil {
 		log.Error("Failed to initialize the database schema.")
 		return err
 	}
 	log.Info("Database initialized successfully!")
 	c.initialized = true // Mark the database as initialized
+	return nil
+}
+
+func (c *Cache) initWaitForDatabase() error {
+	// Wait 20 seconds for the database to come online
+	timeoutAt := time.Now().Add(20 * time.Second)
+	for {
+		if time.Now().After(timeoutAt) {
+			log.Fatal("Failed to connect to the database within 20 seconds")
+			return fmt.Errorf("failed to connect to the database")
+		}
+		log.Info("Trying to connect to database...")
+		db, err := c.db.DB()
+		if err != nil {
+			time.Sleep(1 * time.Second) // Wait a second to give the DB more time
+			continue                    // Keep looping
+		}
+		err = db.Ping()
+		if err != nil {
+			time.Sleep(1 * time.Second) // Wait a second to give the DB more time
+			continue                    // Keep looping
+		}
+		break // Break out of the loop
+	}
+	log.Info("Database connection succeeded.")
 	return nil
 }
 

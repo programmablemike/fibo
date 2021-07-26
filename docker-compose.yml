@@ -7,11 +7,14 @@ services:
     ports:
       - 8080:8080
     environment:
+      PORT: "8080"
       FIBO_PGUSER: ${POSTGRES_USER}
       FIBO_PGPASSWORD: ${POSTGRES_PASSWORD}
       FIBO_PGHOST: postgres
       FIBO_PGPORT: 5432
       FIBO_PGDB: ${POSTGRES_DB}
+    depends_on:
+      - postgres
   postgres:
     image: postgres:${POSTGRES_VERSION}
     restart: always

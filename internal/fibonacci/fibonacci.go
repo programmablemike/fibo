@@ -29,11 +29,16 @@ type Memoizer interface {
 	Clear() error
 }
 
+func Uint64ToString(v uint64) string {
+	return strconv.FormatUint(v, 10)
+}
+
 type Generator struct {
 	cache Memoizer
 }
 
 func NewGenerator(cache Memoizer) *Generator {
+	// TODO: Convert this to using a goroutine for concurrent execution
 	return &Generator{
 		cache: cache,
 	}
@@ -42,10 +47,6 @@ func NewGenerator(cache Memoizer) *Generator {
 // ClearCache wipes the memoizer's Postgres DB
 func (g *Generator) ClearCache() error {
 	return g.cache.Clear()
-}
-
-func Uint64ToString(v uint64) string {
-	return strconv.FormatUint(v, 10)
 }
 
 // Compute Get the fibonacci value for the given ordinal

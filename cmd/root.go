@@ -1,10 +1,13 @@
 package cmd
 
 import (
+	"encoding/json"
 	"fmt"
+	"net/http"
 	"os"
 
 	homedir "github.com/mitchellh/go-homedir"
+	"github.com/programmablemike/fibo/internal/router"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -14,6 +17,74 @@ var (
 	cfgFile = ""
 )
 
+var calculateCmd = &cobra.Command{
+	Use:   "calculate N",
+	Short: "Calculates the Fibonacci number for the given ordinal N",
+	Long:  `Calculates the Fibonacci number for the given ordinal N`,
+	Args:  cobra.MinimumNArgs(1),
+	Run: func(cmd *cobra.Command, args []string) {
+		host := viper.GetString("host")
+		port := viper.GetInt("port")
+
+		uri := fmt.Sprintf("http://%s:%d/fibo/%s", host, port, args[0])
+		res, err := http.Get(uri)
+		if err != nil {
+			log.Fatalf("error: %s\n", err)
+		}
+		v := router.GenericResponse{}
+		err = json.NewDecoder(res.Body).Decode(&v)
+		if err != nil {
+			log.Fatalf("error: failed to decode res.Body, %s\n", err)
+		}
+		fmt.Printf("Fibonacci number: %s\n", v.Value)
+	},
+}
+
+var countCmd = &cobra.Command{
+	Use:   "count [Fibonacci number]",
+	Short: "Counts the number of steps for the given Fibonacci value",
+	Long:  `Counts the number of steps for the given Fibonacci value`,
+	Args:  cobra.MinimumNArgs(1),
+	Run: func(cmd *cobra.Command, args []string) {
+		host := viper.GetString("host")
+		port := viper.GetInt("port")
+
+		uri := fmt.Sprintf("http://%s:%d/fibo/%s/count", host, port, args[0])
+		res, err := http.Get(uri)
+		if err != nil {
+			log.Fatalf("error: %s\n", err)
+		}
+		v := router.GenericResponse{}
+		err = json.NewDecoder(res.Body).Decode(&v)
+		if err != nil {
+			log.Fatalf("error: failed to decode res.Body, %s\n", err)
+		}
+		fmt.Printf("Fibonacci number: %s\n", v.Value)
+	},
+}
+
+var clearCmd = &cobra.Command{
+	Use:   "clear",
+	Short: "Clears the memoizer cache",
+	Long:  `Clears the memoizer cache`,
+	Run: func(cmd *cobra.Command, args []string) {
+		host := viper.GetString("host")
+		port := viper.GetInt("port")
+
+		uri := fmt.Sprintf("http://%s:%d/fibo/clear", host, port)
+		res, err := http.Get(uri)
+		if err != nil {
+			log.Fatalf("error: %s\n", err)
+		}
+		v := router.GenericResponse{}
+		err = json.NewDecoder(res.Body).Decode(&v)
+		if err != nil {
+			log.Fatalf("error: failed to decode res.Body, %s\n", err)
+		}
+		fmt.Println("Successfully cleared cache")
+	},
+}
+
 var rootCmd = &cobra.Command{
 	Use:   "fibo",
 	Short: "Fibo is an API server and CLI client for generating Fibonacci sequences",
@@ -21,7 +92,9 @@ var rootCmd = &cobra.Command{
 				 It uses dynamic programming techniques (memoization) to speed up processing.
 				`,
 	Run: func(cmd *cobra.Command, args []string) {
-		// Do Stuff Here
+		// Print the command line options for debugging purposes
+		log.Debugf("host: %s", viper.GetString("host"))
+		log.Debugf("port: %d", viper.GetInt("port"))
 	},
 }
 
@@ -36,6 +109,11 @@ func init() {
 	cobra.OnInitialize(initConfig)
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.fibo.yaml)")
 	rootCmd.PersistentFlags().Bool("debug", false, "Turns on debugging mode")
+	rootCmd.PersistentFlags().String("host", "localhost", "HTTP server hostname to bind (default: localhost)")
+	rootCmd.PersistentFlags().Int("port", 8080, "HTTP server port to bind (default: 8080)")
+	rootCmd.AddCommand(calculateCmd, countCmd, clearCmd)
+	viper.BindPFlag("host", rootCmd.PersistentFlags().Lookup("host"))
+	viper.BindPFlag("port", rootCmd.PersistentFlags().Lookup("port"))
 	viper.BindPFlag("useViper", rootCmd.PersistentFlags().Lookup("viper"))
 	viper.BindPFlag("debug", rootCmd.PersistentFlags().Lookup("debug"))
 }
