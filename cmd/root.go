@@ -43,9 +43,9 @@ var calculateCmd = &cobra.Command{
 }
 
 var countCmd = &cobra.Command{
-	Use:   "count [number]",
-	Short: "Counts the number of ordinals in the Fibonacci value range (0, number)",
-	Long:  `Counts the number of ordinals in the Fibonacci value range (0, number)`,
+	Use:   "count NUM",
+	Short: "Counts the number of ordinals in the Fibonacci value range (0, NUM)",
+	Long:  `Counts the number of ordinals in the Fibonacci value range (0, NUM)`,
 	Args:  cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		host := viper.GetString("host")
