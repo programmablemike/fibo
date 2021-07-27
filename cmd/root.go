@@ -125,7 +125,7 @@ func Execute() {
 
 func init() {
 	cobra.OnInitialize(initConfig)
-	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.fibo.yaml)")
+	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.fiborc)")
 	rootCmd.PersistentFlags().Bool("debug", false, "Turns on debugging mode")
 	rootCmd.PersistentFlags().String("host", "localhost", "HTTP server hostname to bind (default: localhost)")
 	rootCmd.PersistentFlags().Int("port", 8080, "HTTP server port to bind (default: 8080)")
