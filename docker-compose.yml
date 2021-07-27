@@ -19,7 +19,7 @@ services:
     image: postgres:${POSTGRES_VERSION}
     restart: always
     ports:
-      - 15432:5432
+      - 15432:5432 # a debugging port to use psql and manually inspect the database
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}

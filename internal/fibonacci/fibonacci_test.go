@@ -85,6 +85,21 @@ func (mc *MemoryCache) Clear() error {
 	return nil
 }
 
+func TestFibonacciOrdinalCount(t *testing.T) {
+	g := NewGenerator(NewMockEmptyCache())
+	assert.Equal(t, uint64(12), g.FindOrdinalsInRange(NewNumber(0), NewNumber(120)))
+	// Test a reall really big value to make sure it scales
+	v, _ := NewNumberFromDecimalString("43466557686937456435688527675040625802564660517371780402481729089536555417949051890403879840079255169295922593080322634775209689623239873322471161642996440906533187938298969649928516003704476137795166849228875")
+	assert.Equal(t, uint64(1001), g.FindOrdinalsInRange(NewNumber(0), v))
+}
+
+/*
+func TestFibonacciOrdinalCount(t *testing.T) {
+	g := NewGenerator(NewMockEmptyCache())
+	assert.Equal(t, 12, g.FindOrdinalsInRange(0, 120))
+}
+*/
+
 func TestFibonacciNoCache(t *testing.T) {
 	g := NewGenerator(NewMockEmptyCache())
 	for _, v := range fibonacciTests {

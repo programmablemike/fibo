@@ -8,7 +8,7 @@ requires:
 `make build` - Build the CLI/server binary
 `make test`  - Run the unit & integration tests
 
-## building
+## build
 To build the software you can either call the `go build` command line directly or use
 the built-in [Makefile](./Makefile) rules. When using the Makefile you should specify
 the OS type (ex. `GOOS=darwin` and architecture (ex. `GOARCH=aarch64`) that corresponds
@@ -18,6 +18,7 @@ For a list of all supported OS and architectures, run: `make list-build-targets`
 
 ```bash
 > GOOS=linux GOARCH=amd64 
+```
 
 ## docker
 requires:  
@@ -60,8 +61,8 @@ Please include:
 - [ ] a README.md describing how to build and run it.
 
 Bonus points:
-- [ ] Use dockertest.
-- [ ] Include a Makefile.
+- [x] Use dockertest.
+- [x] Include a Makefile.
 - [ ] Include some data on performance.
 
 ## license

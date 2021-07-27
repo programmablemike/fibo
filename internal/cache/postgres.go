@@ -9,11 +9,12 @@ import (
 	log "github.com/sirupsen/logrus"
 	pg "gorm.io/driver/postgres"
 	gorm "gorm.io/gorm"
+	clause "gorm.io/gorm/clause"
 )
 
 type CacheEntry struct {
 	gorm.Model
-	Ordinal uint64 `gorm:"uniqueIndex"` // The fibonacci ordinal N
+	Ordinal uint64 `gorm:"index"` // The fibonacci ordinal N
 	Value   string // The fibonacci value - we use string to represent arbitrary precision
 }
 
@@ -30,7 +31,10 @@ type Cache struct {
 // NewCache creates a new cache with persistent database connection
 func NewCache(dsn string) *Cache {
 	log.Debugf("Connecting to postgres with DSN=%s", dsn)
-	db, err := gorm.Open(pg.Open(dsn), &gorm.Config{})
+	db, err := gorm.Open(pg.Open(dsn), &gorm.Config{
+		// This turns off the default logging which is too verbose for records that don't exist
+		// Logger: logger.Default.LogMode(logger.Silent),
+	})
 	if err != nil {
 		log.Errorf("Failed to connect to database: %s", err)
 	}
@@ -103,6 +107,9 @@ func (c *Cache) Close() error {
 }
 
 func (c *Cache) Clear() error {
+	log.Info("Clearing the database.")
+	// Deletes all cache entries
+	c.db.Where("1 = 1").Delete(&CacheEntry{})
 	return nil
 }
 
@@ -111,8 +118,10 @@ func (c *Cache) Write(ordinal uint64, value *fibonacci.Number) error {
 		Ordinal: ordinal,
 		Value:   value.String(),
 	}
-	c.db.Create(entry)
-	log.Infof("Wrote cache entry for ordinal=%s", fibonacci.Uint64ToString(ordinal))
+	c.db.Clauses(clause.OnConflict{
+		UpdateAll: true,
+	}).Create(entry)
+	log.Debugf("Wrote cache entry for ordinal=%s", fibonacci.Uint64ToString(ordinal))
 	return nil
 }
 
@@ -120,7 +129,7 @@ func (c *Cache) Read(ordinal uint64) (*fibonacci.Number, error) {
 	entry := new(CacheEntry)
 	result := c.db.Where("ordinal = ?", ordinal).First(entry)
 	if result.Error != nil {
-		log.Warningf("Failed to retrieve cache entry for ordinal=%s: %v", fibonacci.Uint64ToString(ordinal), result.Error)
+		log.Debugf("Failed to retrieve cache entry for ordinal=%s: %v", fibonacci.Uint64ToString(ordinal), result.Error)
 		return fibonacci.NewNumber(-1), result.Error
 	}
 	log.Debugf("Successfully retrieved cached value for ordinal=%s", fibonacci.Uint64ToString(ordinal))
@@ -130,6 +139,6 @@ func (c *Cache) Read(ordinal uint64) (*fibonacci.Number, error) {
 		log.Error(err)
 		return fibonacci.NewNumber(-1), err
 	}
-	log.Infof("Read cache entry for ordinal=%s", fibonacci.Uint64ToString(ordinal))
+	log.Debugf("Read cache entry for ordinal=%s", fibonacci.Uint64ToString(ordinal))
 	return v, nil
 }

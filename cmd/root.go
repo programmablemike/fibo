@@ -26,11 +26,13 @@ var calculateCmd = &cobra.Command{
 		host := viper.GetString("host")
 		port := viper.GetInt("port")
 
-		uri := fmt.Sprintf("http://%s:%d/fibo/%s", host, port, args[0])
+		uri := fmt.Sprintf("http://%s:%d/fibo/calculate/%s", host, port, args[0])
 		res, err := http.Get(uri)
 		if err != nil {
 			log.Fatalf("error: %s\n", err)
 		}
+		defer res.Body.Close()
+
 		v := router.GenericResponse{}
 		err = json.NewDecoder(res.Body).Decode(&v)
 		if err != nil {
@@ -49,11 +51,13 @@ var countCmd = &cobra.Command{
 		host := viper.GetString("host")
 		port := viper.GetInt("port")
 
-		uri := fmt.Sprintf("http://%s:%d/fibo/%s/count", host, port, args[0])
+		uri := fmt.Sprintf("http://%s:%d/fibo/count/%s", host, port, args[0])
 		res, err := http.Get(uri)
 		if err != nil {
 			log.Fatalf("error: %s\n", err)
 		}
+		defer res.Body.Close()
+
 		v := router.GenericResponse{}
 		err = json.NewDecoder(res.Body).Decode(&v)
 		if err != nil {
@@ -71,11 +75,26 @@ var clearCmd = &cobra.Command{
 		host := viper.GetString("host")
 		port := viper.GetInt("port")
 
-		uri := fmt.Sprintf("http://%s:%d/fibo/clear", host, port)
-		res, err := http.Get(uri)
+		uri := fmt.Sprintf("http://%s:%d/fibo/cache", host, port)
+
+		// Create client
+		client := &http.Client{}
+
+		// Create request
+		req, err := http.NewRequest("DELETE", uri, nil)
 		if err != nil {
-			log.Fatalf("error: %s\n", err)
+			log.Fatal(err)
+			return
 		}
+
+		// Fetch Request
+		res, err := client.Do(req)
+		if err != nil {
+			log.Fatal(err)
+			return
+		}
+		defer res.Body.Close()
+
 		v := router.GenericResponse{}
 		err = json.NewDecoder(res.Body).Decode(&v)
 		if err != nil {
