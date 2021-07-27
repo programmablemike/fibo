@@ -43,7 +43,7 @@ This project comes with a CLI for calling the API server.
 
 ### help documentation
 ```bash
-> mike@Mikes-MacBook-Pro fibo % ./fibo_darwin_arm64 help                                                                                      $(git_super_status)
+> mike@Mikes-MacBook-Pro fibo % ./fibo_darwin_arm64 help
 Fibo is an API server and CLI client for generating Fibonacci sequences
 It uses dynamic programming techniques (memoization) to speed up processing.
 
@@ -163,11 +163,14 @@ There are some very basic load tests to get a feeling for the general throughput
 Average ops/second difference between using no caching vs an in-memory cache using ordinals in the range `(0, 20)` inclusive.
 
 As we can see there's a roughly 1,000x difference in the average speed of cached vs. non-cached operation.
-```
+```bash
+> mike@Mikes-MacBook-Pro fibo % make test
+...
 BenchmarkFibonacciNoCache
 BenchmarkFibonacciNoCache-8          130           9022607 ns/op
 BenchmarkFibonacciCached
 BenchmarkFibonacciCached-8        563758              2148 ns/op
+...
 ```
 
 ### server throughput
