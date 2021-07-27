@@ -28,12 +28,6 @@ func TestMain(m *testing.M) {
 	if err != nil {
 		log.Fatalf("Could not start resource: %s", err)
 	}
-	defer func() {
-		// Purge the container
-		if err = pool.Purge(resource); err != nil {
-			log.Fatalf("Could not purge resource: %s", err)
-		}
-	}()
 
 	// exponential backoff-retry, because the application in the container might not be ready to accept connections yet
 	connString = fmt.Sprintf("postgres://postgres:secret@localhost:%s/%s", resource.GetPort("5432/tcp"), database)
@@ -52,6 +46,13 @@ func TestMain(m *testing.M) {
 
 	// Run the test
 	retCode := m.Run()
+
+	// Purge the container
+	// Can't be deferred because os.Exit doesn't respect defer
+	if err = pool.Purge(resource); err != nil {
+		log.Fatalf("Could not purge resource: %s", err)
+	}
+
 	os.Exit(retCode)
 }
 
