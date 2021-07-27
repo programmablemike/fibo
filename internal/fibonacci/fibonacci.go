@@ -49,25 +49,6 @@ func (g *Generator) ClearCache() error {
 	return g.cache.Clear()
 }
 
-// FindOrdinalInRange calculates the number of Fibonacci numbers in a given range
-/*
-func (g *Generator) FindOrdinalsInRange(low int, high int) int {
-	f0 := 0
-	f1 := 1
-	f2 := 1
-	count := 0
-	for f0 <= high {
-		if f0 >= low {
-			count += 1
-		}
-		f0 = f1
-		f1 = f2
-		f2 = f0 + f1
-	}
-	return count
-}
-*/
-
 func (g *Generator) FindOrdinalsInRange(low *Number, high *Number) uint64 {
 	// Initialize the first three fibonacci values
 	f0 := NewNumber(0)
@@ -83,18 +64,18 @@ func (g *Generator) FindOrdinalsInRange(low *Number, high *Number) uint64 {
 	//   +1 if x >  y
 	for f0.Cmp(high) == -1 || f0.Cmp(high) == 0 {
 		if f0.Cmp(low) == 1 || f0.Cmp(low) == 0 {
-			log.Infof("Found %s", f0.String())
+			log.Debugf("Found %s", f0.String())
 			count += 1 // Valid value, increment the count
 		}
-		log.Infof("old f0: %s", f0.String())
-		log.Infof("old f1: %s", f1.String())
-		log.Infof("old f2: %s", f2.String())
+		log.Debugf("old f0: %s", f0.String())
+		log.Debugf("old f1: %s", f1.String())
+		log.Debugf("old f2: %s", f2.String())
 		f0 = NewNumber(0).Set(f1)
 		f1 = NewNumber(0).Set(f2)
 		f2 = NewNumber(0).Add(f0, f1)
-		log.Infof("new f0: %s", f0.String())
-		log.Infof("new f1: %s", f1.String())
-		log.Infof("new f2: %s", f2.String())
+		log.Debugf("new f0: %s", f0.String())
+		log.Debugf("new f1: %s", f1.String())
+		log.Debugf("new f2: %s", f2.String())
 	}
 	return count
 }

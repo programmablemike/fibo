@@ -10,6 +10,7 @@ import (
 	pg "gorm.io/driver/postgres"
 	gorm "gorm.io/gorm"
 	clause "gorm.io/gorm/clause"
+	"gorm.io/gorm/logger"
 )
 
 type CacheEntry struct {
@@ -33,7 +34,7 @@ func NewCache(dsn string) *Cache {
 	log.Debugf("Connecting to postgres with DSN=%s", dsn)
 	db, err := gorm.Open(pg.Open(dsn), &gorm.Config{
 		// This turns off the default logging which is too verbose for records that don't exist
-		// Logger: logger.Default.LogMode(logger.Silent),
+		Logger: logger.Default.LogMode(logger.Silent),
 	})
 	if err != nil {
 		log.Errorf("Failed to connect to database: %s", err)

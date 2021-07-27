@@ -42,7 +42,7 @@ update-deps:
 	git add go.mod go.sum vendor/*
 
 k6:
-	k6 run ./k6/worker.js
+	k6 run ./k6/calculate-worker.js
 
 clean:
 	rm fibo_*

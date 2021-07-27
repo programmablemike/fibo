@@ -43,9 +43,9 @@ var calculateCmd = &cobra.Command{
 }
 
 var countCmd = &cobra.Command{
-	Use:   "count [Fibonacci number]",
-	Short: "Counts the number of steps for the given Fibonacci value",
-	Long:  `Counts the number of steps for the given Fibonacci value`,
+	Use:   "count [number]",
+	Short: "Counts the number of ordinals in the Fibonacci value range (0, number)",
+	Long:  `Counts the number of ordinals in the Fibonacci value range (0, number)`,
 	Args:  cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		host := viper.GetString("host")
@@ -63,7 +63,7 @@ var countCmd = &cobra.Command{
 		if err != nil {
 			log.Fatalf("error: failed to decode res.Body, %s\n", err)
 		}
-		fmt.Printf("Fibonacci number: %s\n", v.Value)
+		fmt.Printf("Ordinals in this range: %s\n", v.Value)
 	},
 }
 
@@ -108,8 +108,7 @@ var rootCmd = &cobra.Command{
 	Use:   "fibo",
 	Short: "Fibo is an API server and CLI client for generating Fibonacci sequences",
 	Long: `Fibo is an API server and CLI client for generating Fibonacci sequences
-				 It uses dynamic programming techniques (memoization) to speed up processing.
-				`,
+It uses dynamic programming techniques (memoization) to speed up processing.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		// Print the command line options for debugging purposes
 		log.Debugf("host: %s", viper.GetString("host"))

@@ -11,6 +11,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	pg "gorm.io/driver/postgres"
 	gorm "gorm.io/gorm"
+	"gorm.io/gorm/logger"
 )
 
 var database string = "fibo_test"
@@ -37,7 +38,10 @@ func TestMain(m *testing.M) {
 	// exponential backoff-retry, because the application in the container might not be ready to accept connections yet
 	connString = fmt.Sprintf("postgres://postgres:secret@localhost:%s/%s", resource.GetPort("5432/tcp"), database)
 	if err := pool.Retry(func() error {
-		_, err := gorm.Open(pg.Open(connString), &gorm.Config{})
+		_, err := gorm.Open(pg.Open(connString), &gorm.Config{
+			// This turns off the default logging which is too verbose for records that don't exist
+			Logger: logger.Default.LogMode(logger.Silent),
+		})
 		if err != nil {
 			return err
 		}

@@ -93,13 +93,6 @@ func TestFibonacciOrdinalCount(t *testing.T) {
 	assert.Equal(t, uint64(1001), g.FindOrdinalsInRange(NewNumber(0), v))
 }
 
-/*
-func TestFibonacciOrdinalCount(t *testing.T) {
-	g := NewGenerator(NewMockEmptyCache())
-	assert.Equal(t, 12, g.FindOrdinalsInRange(0, 120))
-}
-*/
-
 func TestFibonacciNoCache(t *testing.T) {
 	g := NewGenerator(NewMockEmptyCache())
 	for _, v := range fibonacciTests {
