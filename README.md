@@ -148,8 +148,9 @@ ok      github.com/programmablemike/fibo/internal/fibonacci     3.436s
 Note: The PostgreSQL cache tests use [Dockertest](https://github.com/ory/dockertest) and require Docker to be installed and running.
 
 ## load tests
-There are some very basic load tests to get a feeling for the general throughput of 
+There are some very basic load tests to get a feeling for the general throughput of the HTTP server end-to-end.
 
+To run the load tests (requires K6 to be installed):  
 ```bash
 # Start the Docker enviroment
 > make docker-start
