@@ -110,6 +110,7 @@ func (c *Cache) Close() error {
 func (c *Cache) Clear() error {
 	log.Info("Clearing the database.")
 	// Deletes all cache entries
+	// Note that this only "tombstones" the entries in Gorm by adding a "deleted_at" timestamp
 	c.db.Where("1 = 1").Delete(&CacheEntry{})
 	return nil
 }
