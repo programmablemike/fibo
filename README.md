@@ -7,7 +7,7 @@ Requires:
 * [Make](https://www.gnu.org/software/make/)
 * [Docker](https://www.docker.com) 
 * [Docker-Compose](https://docs.docker.com/compose/install/)
-* [K6][https://k6.io] (Optional. For running load tests.)
+* [K6](https://k6.io) (Optional. For running load tests.)
 
 ## build
 To build from source:  
