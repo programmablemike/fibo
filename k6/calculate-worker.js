@@ -5,14 +5,8 @@ import http from 'k6/http';
  * Default test options
  */
 export let options = {
-    //vus: 30,
-    //duration: '30s',
-    stages: [
-        { duration: '30s',   target: 1 },
-        { duration: '30s',   target: 10 },
-        { duration: '30s',   target: 20 },
-        { duration: '30s',   target: 30 },
-    ],
+    vus: 10,
+    duration: '30s',
   };
 
 /**
