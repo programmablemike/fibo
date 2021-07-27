@@ -220,11 +220,7 @@ default ✓ [======================================] 10 VUs  30s
      vus_max........................: 10      min=10      max=10 
 ```
 
-Average request duration is `~13ms` which is likely a result of. 
-
-Currently we're using a single generator shared between all request instances which constrains overall throughput at the
-benefit of limiting the number of backend database connections being spawned. We would expect to see a significant improvement
-in overall throughput if we transition to using a generator worker pool instead.
+Average request duration is `~13ms` which is likely a result of latency in calculating the values. Currently we're using a single generator instance shared between all requests which constrains the overall throughput, but has the benefit of limiting the number of backend database connections being created. We would expect to see a significant improvement in overall throughput if we transition to using a generator worker pool instead.
 
 ## prompt
 Expose a Fibonacci sequence generator through a web API that memoizes intermediate values.
