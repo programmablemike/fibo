@@ -22,5 +22,5 @@ export default function () {
     let ordinal = Math.floor(Math.random() * 30)
     let res = http.get(`http://localhost:8080/fibo/${ordinal}`);
     check(res, {'is status 200': (r) => r.status === 200});
-    check(res, {'gives correct fibonacci value': (r) => r.json().value === expected[ordinal]})
+    check(res, {'gives correct fibonacci value': (r) => r.json().value == expected[ordinal]})
 }

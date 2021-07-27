@@ -1,5 +1,5 @@
 #!/usr/bin/env make
-.PHONY: docker list-build-targets update-deps
+.PHONY: build docker list-build-targets update-deps k6
 SHELL := bash
 CC_CMD := go build
 CC_OPTS := --mod=vendor
