@@ -160,9 +160,9 @@ There are some very basic load tests to get a feeling for the general throughput
 
 ## performance
 ### cached vs non-cached
-Average ops/second difference between using no caching vs an in-memory cache using ordinals in the range(0, 20).
+Average ops/second difference between using no caching vs an in-memory cache using ordinals in the range `(0, 20)` inclusive.
 
-As we can see there's a roughly 1,000x difference in the speed of cached vs. non-cached operations.
+As we can see there's a roughly 1,000x difference in the average speed of cached vs. non-cached operation.
 ```
 BenchmarkFibonacciNoCache
 BenchmarkFibonacciNoCache-8          130           9022607 ns/op
@@ -171,10 +171,10 @@ BenchmarkFibonacciCached-8        563758              2148 ns/op
 ```
 
 ### server throughput
-Benchmarking of the HTTP server shows a throughput of ~746 req/s calcuting ordinals in the range (0, 30).
+Benchmarking of the HTTP server shows a throughput of `~746 requests/sec` calculating ordinals in the range `(0, 30)` inclusive.
 
 ```bash
-> mike@Mikes-MacBook-Pro fibo % make k6                                                                                                       $(git_super_status)
+mike@Mikes-MacBook-Pro fibo % make k6                                                                                                       $(git_super_status)
 k6 run ./k6/calculate-worker.js
 
           /\      |‾‾| /‾‾/   /‾‾/   
@@ -216,7 +216,7 @@ default ✓ [======================================] 10 VUs  30s
      vus_max........................: 10      min=10      max=10 
 ```
 
-Average request duration is ~13ms which is likely a result of. 
+Average request duration is `~13ms` which is likely a result of. 
 
 Currently we're using a single generator shared between all request instances which constrains overall throughput at the
 benefit of limiting the number of backend database connections being spawned. We would expect to see a significant improvement
