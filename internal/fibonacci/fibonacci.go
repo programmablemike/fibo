@@ -50,6 +50,8 @@ func (g *Generator) ClearCache() error {
 }
 
 func (g *Generator) FindOrdinalsInRange(low *Number, high *Number) uint64 {
+	log.Debugf("Counting ordinals in range %s to %s...", low.String(), high.String())
+
 	// Initialize the first three fibonacci values
 	f0 := NewNumber(0)
 	f1 := NewNumber(1)
@@ -57,25 +59,17 @@ func (g *Generator) FindOrdinalsInRange(low *Number, high *Number) uint64 {
 	// Contains the count of valid ordinals
 	count := uint64(0)
 
-	log.Infof("Counting ordinals in range %s to %s...", low.String(), high.String())
 	// Values for Number.Cmp:
 	//   -1 if x <  y
 	//    0 if x == y
 	//   +1 if x >  y
 	for f0.Cmp(high) == -1 || f0.Cmp(high) == 0 {
 		if f0.Cmp(low) == 1 || f0.Cmp(low) == 0 {
-			log.Debugf("Found %s", f0.String())
 			count += 1 // Valid value, increment the count
 		}
-		log.Debugf("old f0: %s", f0.String())
-		log.Debugf("old f1: %s", f1.String())
-		log.Debugf("old f2: %s", f2.String())
 		f0 = NewNumber(0).Set(f1)
 		f1 = NewNumber(0).Set(f2)
 		f2 = NewNumber(0).Add(f0, f1)
-		log.Debugf("new f0: %s", f0.String())
-		log.Debugf("new f1: %s", f1.String())
-		log.Debugf("new f2: %s", f2.String())
 	}
 	return count
 }
