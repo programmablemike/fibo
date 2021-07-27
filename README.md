@@ -12,10 +12,10 @@ Requires:
 ## build
 To build from source:  
 ```bash
-# Build using standard Go tooling
-> go build . 
-# Build using the Makefile. This passes the --mod=vendor flag automatically for more reproducible builds.
-> GOOS=darwin GOARCH=aarch64 make build 
+# Build using the Makefile
+# GOOS and GOARCH should be changed to your computer's architecture.
+# Run `make list-build-targets` for a list of available targets.
+> GOOS=darwin GOARCH=arm64 make build                                                                    $(git_super_status)
 ```
 
 ## running the Docker Compose environment
