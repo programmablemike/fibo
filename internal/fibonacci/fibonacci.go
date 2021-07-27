@@ -59,7 +59,7 @@ func (g *Generator) FindOrdinalsInRange(low *Number, high *Number) uint64 {
 	// Contains the count of valid ordinals
 	count := uint64(0)
 
-	// Values for Number.Cmp:
+	// Values for x.Cmp(y):
 	//   -1 if x <  y
 	//    0 if x == y
 	//   +1 if x >  y
