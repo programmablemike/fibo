@@ -86,6 +86,10 @@ Fibonacci number: 33644764876431783266621612005107543310302148460680063906564769
 Ordinals in this range: 10001
 ```
 
+NOTE: We made a technical tradeoff *not* to use the memoized cache to get the ordinal count in order to generate and store very large Fibonacci values.
+
+When calculating and storing large Fibonacci values things quickly start to overflow the value ranges for [`INTEGER` and `BIGINT`](https://www.postgresql.org/docs/9.5/datatype-numeric.html). In order to sidestep this issue, the Fibonacci values (column name: `value`) are stored as `TEXT` in the cache table which precludes us from being able to range over the `value` column in order to do the ordinal count.
+
 ### clearing the memoizer cache
 ```bash
 > mike@Mikes-MacBook-Pro fibo % ./fibo_darwin_arm64 clear
