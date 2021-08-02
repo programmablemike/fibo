@@ -27,5 +27,8 @@ services:
       PGDATA: /var/lib/postgresql/data
     volumes:
       - pgvolume01:/var/lib/postgresql/data
+  jaeger:
+    image: jaegertracing/all-in-one
+    restart: always
 volumes:
   pgvolume01: {}

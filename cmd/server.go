@@ -7,6 +7,7 @@ import (
 	"github.com/programmablemike/fibo/internal/cache"
 	"github.com/programmablemike/fibo/internal/fibonacci"
 	"github.com/programmablemike/fibo/internal/router"
+	"github.com/programmablemike/fibo/internal/tracing"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -55,6 +56,9 @@ var serverCmd = &cobra.Command{
 		log.Debugf("pghost: %s", viper.GetString("pghost"))
 		log.Debugf("pgport: %s", viper.GetString("pgport"))
 		log.Debugf("pgdb: %s", viper.GetString("pgdb"))
+
+		closer := tracing.SetupTracing("fibo-server")
+		defer closer.Close()
 
 		dsn := createDsnFromConfig()
 		c := cache.NewCache(dsn)
