@@ -8,20 +8,10 @@ import (
 	"strconv"
 
 	"github.com/gorilla/mux"
+	api "github.com/programmablemike/fibo/api"
 	"github.com/programmablemike/fibo/internal/fibonacci"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
-)
-
-type GenericResponse struct {
-	Status  string `json:"status"`
-	Message string `json:"message"`
-	Value   string `json:"value"`
-}
-
-const (
-	StatusOK    string = "OK"
-	StatusError string = "ERROR"
 )
 
 func NewRouter(gen *fibonacci.Generator) *mux.Router {
@@ -30,8 +20,8 @@ func NewRouter(gen *fibonacci.Generator) *mux.Router {
 	// Root handler
 	r.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
-		res := GenericResponse{
-			Status:  StatusOK,
+		res := api.GenericResponse{
+			Status:  api.StatusOK,
 			Message: "OK",
 		}
 		json.NewEncoder(w).Encode(res)
@@ -44,8 +34,8 @@ func NewRouter(gen *fibonacci.Generator) *mux.Router {
 		log.Infof("Calculating Fibonacci number for ordinal=%s...", vars["ordinal"])
 		ord, err := strconv.ParseUint(vars["ordinal"], 10, 64)
 		if err != nil {
-			res := GenericResponse{
-				Status:  StatusError,
+			res := api.GenericResponse{
+				Status:  api.StatusError,
 				Message: "failed to parse ordinal value",
 			}
 			w.WriteHeader(http.StatusBadRequest)
@@ -53,8 +43,8 @@ func NewRouter(gen *fibonacci.Generator) *mux.Router {
 			return
 		}
 		value := gen.Compute(ord)
-		res := GenericResponse{
-			Status:  StatusOK,
+		res := api.GenericResponse{
+			Status:  api.StatusOK,
 			Message: "",
 			Value:   value.String(),
 		}
@@ -67,16 +57,16 @@ func NewRouter(gen *fibonacci.Generator) *mux.Router {
 
 		err := gen.ClearCache()
 		if err != nil {
-			res := GenericResponse{
-				Status:  StatusError,
+			res := api.GenericResponse{
+				Status:  api.StatusError,
 				Message: fmt.Sprintf("%e", err),
 			}
 			w.WriteHeader(http.StatusInternalServerError)
 			json.NewEncoder(w).Encode(res)
 			return
 		}
-		res := GenericResponse{
-			Status:  StatusOK,
+		res := api.GenericResponse{
+			Status:  api.StatusOK,
 			Message: "Cache cleared",
 		}
 		w.WriteHeader(http.StatusOK)
@@ -90,8 +80,8 @@ func NewRouter(gen *fibonacci.Generator) *mux.Router {
 		log.Infof("Counting ordinals between 0 and %s...", vars["number"])
 		number, ok := fibonacci.NewNumberFromDecimalString(vars["number"])
 		if !ok {
-			res := GenericResponse{
-				Status:  StatusError,
+			res := api.GenericResponse{
+				Status:  api.StatusError,
 				Message: "failed to parse Fibonacci number value",
 			}
 			w.WriteHeader(http.StatusBadRequest)
@@ -99,8 +89,8 @@ func NewRouter(gen *fibonacci.Generator) *mux.Router {
 			return
 		}
 		value := gen.FindOrdinalsInRange(fibonacci.NewNumber(0), number)
-		res := GenericResponse{
-			Status:  StatusOK,
+		res := api.GenericResponse{
+			Status:  api.StatusOK,
 			Message: "",
 			Value:   fibonacci.Uint64ToString(value),
 		}

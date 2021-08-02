@@ -33,6 +33,14 @@ func Uint64ToString(v uint64) string {
 	return strconv.FormatUint(v, 10)
 }
 
+func StringToUint64(v string) (uint64, error) {
+	value, err := strconv.ParseUint(v, 10, 64)
+	if err != nil {
+		return 0, err
+	}
+	return value, nil
+}
+
 type Generator struct {
 	cache Memoizer
 }

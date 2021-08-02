@@ -1,15 +1,13 @@
 package cmd
 
 import (
-	"encoding/json"
 	"fmt"
 	"net/http"
 	"os"
 
 	homedir "github.com/mitchellh/go-homedir"
-	opentracing "github.com/opentracing/opentracing-go"
-	"github.com/programmablemike/fibo/internal/router"
-	"github.com/programmablemike/fibo/internal/tracing"
+	api "github.com/programmablemike/fibo/api"
+	"github.com/programmablemike/fibo/internal/fibonacci"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -28,33 +26,42 @@ var calculateCmd = &cobra.Command{
 		host := viper.GetString("host")
 		port := viper.GetInt("port")
 
-		closer := tracing.SetupTracing("fibo-client")
-		defer closer.Close()
-		tracer := opentracing.GlobalTracer()
-		span := tracer.StartSpan("calculate")
-		defer span.Finish()
+		/*
+			closer := tracing.SetupTracing("fibo-client")
+			defer closer.Close()
+			tracer := opentracing.GlobalTracer()
+			span := tracer.StartSpan("calculate")
+			defer span.Finish()
 
-		client := &http.Client{}
-		uri := fmt.Sprintf("http://%s:%d/fibo/calculate/%s", host, port, args[0])
-		req, _ := http.NewRequest("GET", uri, nil)
+			client := &http.Client{}
+			uri := fmt.Sprintf("http://%s:%d/fibo/calculate/%s", host, port, args[0])
+			req, _ := http.NewRequest("GET", uri, nil)
 
-		// inject tracing headers to match up client requests with server responses
-		tracer.Inject(span.Context(),
-			opentracing.HTTPHeaders,
-			opentracing.HTTPHeadersCarrier(req.Header))
+			// inject tracing headers to match up client requests with server responses
+			tracer.Inject(span.Context(),
+				opentracing.HTTPHeaders,
+				opentracing.HTTPHeadersCarrier(req.Header))
 
-		res, err := client.Do(req)
+			res, err := client.Do(req)
+			if err != nil {
+				log.Fatalf("error: %s\n", err)
+			}
+			defer res.Body.Close()
+
+			v := router.GenericResponse{}
+			err = json.NewDecoder(res.Body).Decode(&v)
+		*/
+		client := api.NewApiClient("http", host, port, &http.Client{})
+		ordinal, err := fibonacci.StringToUint64(args[0])
+		if err != nil {
+			log.Fatalf("could not convert string to ordinal: %s", err)
+		}
+		v, err := client.Calculate(ordinal)
+
 		if err != nil {
 			log.Fatalf("error: %s\n", err)
 		}
-		defer res.Body.Close()
-
-		v := router.GenericResponse{}
-		err = json.NewDecoder(res.Body).Decode(&v)
-		if err != nil {
-			log.Fatalf("error: failed to decode res.Body, %s\n", err)
-		}
-		fmt.Printf("Fibonacci number: %s\n", v.Value)
+		fmt.Printf("Fibonacci number: %s\n", v)
 	},
 }
 
@@ -67,33 +74,17 @@ var countCmd = &cobra.Command{
 		host := viper.GetString("host")
 		port := viper.GetInt("port")
 
-		closer := tracing.SetupTracing("fibo-client")
-		defer closer.Close()
-		tracer := opentracing.GlobalTracer()
-		span := tracer.StartSpan("count")
-		defer span.Finish()
+		client := api.NewApiClient("http", host, port, &http.Client{})
 
-		client := &http.Client{}
-		uri := fmt.Sprintf("http://%s:%d/fibo/count/%s", host, port, args[0])
-		req, _ := http.NewRequest("GET", uri, nil)
-
-		// inject tracing headers to match up client requests with server responses
-		tracer.Inject(span.Context(),
-			opentracing.HTTPHeaders,
-			opentracing.HTTPHeadersCarrier(req.Header))
-
-		res, err := client.Do(req)
+		number, ok := fibonacci.NewNumberFromDecimalString(args[0])
+		if !ok {
+			log.Fatalf("invalid NUM %s", args[0])
+		}
+		v, err := client.Count(number)
 		if err != nil {
 			log.Fatalf("error: %s\n", err)
 		}
-		defer res.Body.Close()
-
-		v := router.GenericResponse{}
-		err = json.NewDecoder(res.Body).Decode(&v)
-		if err != nil {
-			log.Fatalf("error: failed to decode res.Body, %s\n", err)
-		}
-		fmt.Printf("Ordinals in this range: %s\n", v.Value)
+		fmt.Printf("Ordinals in this range: %s\n", v)
 	},
 }
 
@@ -105,34 +96,14 @@ var clearCmd = &cobra.Command{
 		host := viper.GetString("host")
 		port := viper.GetInt("port")
 
-		closer := tracing.SetupTracing("fibo-client")
-		defer closer.Close()
-		tracer := opentracing.GlobalTracer()
-		span := tracer.StartSpan("clear")
-		defer span.Finish()
+		client := api.NewApiClient("http", host, port, &http.Client{})
+		err := client.ClearCache()
 
-		client := &http.Client{}
-		uri := fmt.Sprintf("http://%s:%d/fibo/cache", host, port)
-		req, _ := http.NewRequest("DELETE", uri, nil)
-
-		// inject tracing headers to match up client requests with server responses
-		tracer.Inject(span.Context(),
-			opentracing.HTTPHeaders,
-			opentracing.HTTPHeadersCarrier(req.Header))
-
-		res, err := client.Do(req)
 		if err != nil {
-			log.Fatal(err)
-			return
+			log.Fatalf("error: %s\n", err)
+		} else {
+			fmt.Println("Successfully cleared the cache")
 		}
-		defer res.Body.Close()
-
-		v := router.GenericResponse{}
-		err = json.NewDecoder(res.Body).Decode(&v)
-		if err != nil {
-			log.Fatalf("error: failed to decode res.Body, %s\n", err)
-		}
-		fmt.Println("Successfully cleared cache")
 	},
 }
 
