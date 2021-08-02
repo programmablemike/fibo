@@ -4,6 +4,7 @@ services:
     build: .
     links:
       - postgres
+      - jaeger
     ports:
       - 8080:8080
     environment:
@@ -30,5 +31,7 @@ services:
   jaeger:
     image: jaegertracing/all-in-one
     restart: always
+    ports:
+      - 16686:16686 # jaeger front-end UI
 volumes:
   pgvolume01: {}

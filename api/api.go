@@ -67,17 +67,6 @@ func (ac ApiClient) GetApiBaseUri() string {
 	}
 }
 
-// execute makes the API call and handles any error that might occur
-func (ac ApiClient) execute(req *http.Request) *http.Response {
-	res, err := ac.client.Do(req)
-	// catastrophic error - this can't be recovered from
-	if err != nil {
-		log.Fatalf("unrecoverable error during API request: %s", err)
-		return nil
-	}
-	return res
-}
-
 func (ac ApiClient) DecodeGenericResponse(res *http.Response) *GenericResponse {
 	resp := &GenericResponse{}
 	err := json.NewDecoder(res.Body).Decode(resp)
@@ -92,7 +81,11 @@ func (ac ApiClient) Count(max *fibonacci.Number) (string, error) {
 	uri := fmt.Sprintf("%s/count/%s", ac.GetApiBaseUri(), max.String())
 
 	req, _ := http.NewRequest("GET", uri, nil)
-	res := ac.execute(req)
+	res, err := ac.client.Do(req)
+	if err != nil {
+		log.Errorf("request error: %s", err)
+		return "", err
+	}
 	defer res.Body.Close()
 	resp := ac.DecodeGenericResponse(res)
 
@@ -107,7 +100,11 @@ func (ac ApiClient) Calculate(ordinal uint64) (string, error) {
 	uri := fmt.Sprintf("%s/calculate/%s", ac.GetApiBaseUri(), fibonacci.Uint64ToString(ordinal))
 
 	req, _ := http.NewRequest("GET", uri, nil)
-	res := ac.execute(req)
+	res, err := ac.client.Do(req)
+	if err != nil {
+		log.Errorf("request error: %s", err)
+		return "", err
+	}
 	defer res.Body.Close()
 	resp := ac.DecodeGenericResponse(res)
 	if resp.Status == StatusOK {
@@ -121,7 +118,11 @@ func (ac ApiClient) ClearCache() error {
 	uri := fmt.Sprintf("%s/cache", ac.GetApiBaseUri())
 
 	req, _ := http.NewRequest("DELETE", uri, nil)
-	res := ac.execute(req)
+	res, err := ac.client.Do(req)
+	if err != nil {
+		log.Errorf("request error: %s", err)
+		return err
+	}
 	defer res.Body.Close()
 	resp := ac.DecodeGenericResponse(res)
 
