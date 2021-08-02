@@ -16,7 +16,7 @@ import (
 // returns an io.Closer to be deferred in main() to flush the stream
 //   and/or an error if the setup failed
 func Init(service string) io.Closer {
-	cfg := jaegercfg.Configuration{
+	defaultCfg := jaegercfg.Configuration{
 		ServiceName: service,
 		Sampler: &jaegercfg.SamplerConfig{
 			Type:  jaeger.SamplerTypeConst,
@@ -26,6 +26,8 @@ func Init(service string) io.Closer {
 			LogSpans: true,
 		},
 	}
+	cfg, _ := defaultCfg.FromEnv()
+	log.Infof("Using Jaeger configuration %v", cfg)
 
 	jMetricsFactory := jaegerlog.NullFactory
 	tracer, closer, err := cfg.NewTracer(
@@ -37,6 +39,7 @@ func Init(service string) io.Closer {
 		return nil
 	}
 	opentracing.SetGlobalTracer(tracer)
+	log.Info("Successfully initialized Jaeger tracing")
 
 	return closer
 }
@@ -52,6 +55,15 @@ func Inject(span opentracing.Span, request *http.Request) error {
 		span.Context(),
 		opentracing.HTTPHeaders,
 		opentracing.HTTPHeadersCarrier(request.Header),
+	)
+}
+
+// Inject the HTTP headers for tracing into an HTTP response's headers
+func InjectResponse(span opentracing.Span, response *http.Response) error {
+	return span.Tracer().Inject(
+		span.Context(),
+		opentracing.HTTPHeaders,
+		opentracing.HTTPHeadersCarrier(response.Header),
 	)
 }
 

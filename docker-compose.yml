@@ -14,6 +14,7 @@ services:
       FIBO_PGHOST: postgres
       FIBO_PGPORT: 5432
       FIBO_PGDB: ${POSTGRES_DB}
+      JAEGER_AGENT_HOST: jaeger
     depends_on:
       - postgres
   postgres:

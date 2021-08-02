@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/opentracing/opentracing-go"
 	"github.com/programmablemike/fibo/internal/cache"
 	"github.com/programmablemike/fibo/internal/fibonacci"
 	"github.com/programmablemike/fibo/internal/router"
@@ -60,12 +59,11 @@ var serverCmd = &cobra.Command{
 
 		closer := tracing.Init("fibo-server")
 		defer closer.Close()
-		tracer := opentracing.GlobalTracer()
 
 		dsn := createDsnFromConfig()
 		c := cache.NewCache(dsn)
 		gen := fibonacci.NewGenerator(c)
-		r := router.NewRouter(gen, &tracer)
+		r := router.NewRouter(gen)
 		addr := fmt.Sprintf("%s:%d", viper.GetString("host"), viper.GetInt("port"))
 		log.Info("Started server at ", addr)
 		http.ListenAndServe(addr, r)

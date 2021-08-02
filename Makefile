@@ -30,6 +30,9 @@ docker-logs-app:
 docker-logs-db:
 	docker-compose logs postgres
 
+docker-logs-jaeger:
+	docker-compose logs jaeger
+
 docker-start:
 	docker-compose up --detach
 
