@@ -8,6 +8,7 @@ import (
 	homedir "github.com/mitchellh/go-homedir"
 	api "github.com/programmablemike/fibo/api"
 	"github.com/programmablemike/fibo/internal/fibonacci"
+	"github.com/programmablemike/fibo/internal/tracing"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -25,32 +26,10 @@ var calculateCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		host := viper.GetString("host")
 		port := viper.GetInt("port")
+		// setup tracing
+		closer := tracing.Init("fibo-client")
+		defer closer.Close()
 
-		/*
-			closer := tracing.SetupTracing("fibo-client")
-			defer closer.Close()
-			tracer := opentracing.GlobalTracer()
-			span := tracer.StartSpan("calculate")
-			defer span.Finish()
-
-			client := &http.Client{}
-			uri := fmt.Sprintf("http://%s:%d/fibo/calculate/%s", host, port, args[0])
-			req, _ := http.NewRequest("GET", uri, nil)
-
-			// inject tracing headers to match up client requests with server responses
-			tracer.Inject(span.Context(),
-				opentracing.HTTPHeaders,
-				opentracing.HTTPHeadersCarrier(req.Header))
-
-			res, err := client.Do(req)
-			if err != nil {
-				log.Fatalf("error: %s\n", err)
-			}
-			defer res.Body.Close()
-
-			v := router.GenericResponse{}
-			err = json.NewDecoder(res.Body).Decode(&v)
-		*/
 		client := api.NewApiClient("http", host, port, &http.Client{})
 		ordinal, err := fibonacci.StringToUint64(args[0])
 		if err != nil {
@@ -73,6 +52,9 @@ var countCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		host := viper.GetString("host")
 		port := viper.GetInt("port")
+		// setup tracing
+		closer := tracing.Init("fibo-client")
+		defer closer.Close()
 
 		client := api.NewApiClient("http", host, port, &http.Client{})
 
@@ -95,6 +77,9 @@ var clearCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		host := viper.GetString("host")
 		port := viper.GetInt("port")
+		// setup tracing
+		closer := tracing.Init("fibo-client")
+		defer closer.Close()
 
 		client := api.NewApiClient("http", host, port, &http.Client{})
 		err := client.ClearCache()
@@ -132,9 +117,13 @@ func init() {
 	rootCmd.PersistentFlags().Bool("debug", false, "Turns on debugging mode")
 	rootCmd.PersistentFlags().String("host", "localhost", "HTTP server hostname to bind (default: localhost)")
 	rootCmd.PersistentFlags().Int("port", 8080, "HTTP server port to bind (default: 8080)")
+	rootCmd.PersistentFlags().String("jaeger-host", "localhost", "Jaeger tracing ingestion hostname (default: localhost)")
+	rootCmd.PersistentFlags().Int("jaeger-port", 6831, "Jaeger tracing ingestion port (default: 6831")
 	rootCmd.AddCommand(calculateCmd, countCmd, clearCmd)
 	viper.BindPFlag("host", rootCmd.PersistentFlags().Lookup("host"))
 	viper.BindPFlag("port", rootCmd.PersistentFlags().Lookup("port"))
+	viper.BindPFlag("jaegerHost", rootCmd.PersistentFlags().Lookup("jaeger-host"))
+	viper.BindPFlag("jaegerPort", rootCmd.PersistentFlags().Lookup("jaeger-port"))
 	viper.BindPFlag("useViper", rootCmd.PersistentFlags().Lookup("viper"))
 	viper.BindPFlag("debug", rootCmd.PersistentFlags().Lookup("debug"))
 }

@@ -33,6 +33,8 @@ services:
     image: jaegertracing/all-in-one
     restart: always
     ports:
-      - 16686:16686 # jaeger front-end UI
+      - 14271:14271/tcp # health check
+      - 16686:16686/tcp # jaeger front-end UI
+      - 6831:6831/udp # jaeger.thrift compact ingestion
 volumes:
   pgvolume01: {}

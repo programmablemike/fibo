@@ -5,7 +5,9 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/opentracing/opentracing-go"
 	"github.com/programmablemike/fibo/internal/fibonacci"
+	"github.com/programmablemike/fibo/internal/tracing"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -78,9 +80,12 @@ func (ac ApiClient) DecodeGenericResponse(res *http.Response) *GenericResponse {
 }
 
 func (ac ApiClient) Count(max *fibonacci.Number) (string, error) {
+	span := opentracing.StartSpan("count")
+	defer span.Finish()
 	uri := fmt.Sprintf("%s/count/%s", ac.GetApiBaseUri(), max.String())
 
 	req, _ := http.NewRequest("GET", uri, nil)
+	tracing.Inject(span, req) // Inject the tracer
 	res, err := ac.client.Do(req)
 	if err != nil {
 		log.Errorf("request error: %s", err)
@@ -97,9 +102,12 @@ func (ac ApiClient) Count(max *fibonacci.Number) (string, error) {
 }
 
 func (ac ApiClient) Calculate(ordinal uint64) (string, error) {
+	span := opentracing.StartSpan("calculate")
+	defer span.Finish()
 	uri := fmt.Sprintf("%s/calculate/%s", ac.GetApiBaseUri(), fibonacci.Uint64ToString(ordinal))
 
 	req, _ := http.NewRequest("GET", uri, nil)
+	tracing.Inject(span, req) // Inject the tracer
 	res, err := ac.client.Do(req)
 	if err != nil {
 		log.Errorf("request error: %s", err)
@@ -115,9 +123,12 @@ func (ac ApiClient) Calculate(ordinal uint64) (string, error) {
 }
 
 func (ac ApiClient) ClearCache() error {
+	span := opentracing.StartSpan("clear-cache")
+	defer span.Finish()
 	uri := fmt.Sprintf("%s/cache", ac.GetApiBaseUri())
 
 	req, _ := http.NewRequest("DELETE", uri, nil)
+	tracing.Inject(span, req) // Inject the tracer
 	res, err := ac.client.Do(req)
 	if err != nil {
 		log.Errorf("request error: %s", err)

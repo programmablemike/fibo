@@ -1,12 +1,14 @@
 package tracing
 
 import (
+	"fmt"
 	"io"
 	"net/http"
 
 	"github.com/opentracing/opentracing-go"
 	"github.com/opentracing/opentracing-go/ext"
 	log "github.com/sirupsen/logrus"
+	"github.com/spf13/viper"
 	"github.com/uber/jaeger-client-go"
 	jaegercfg "github.com/uber/jaeger-client-go/config"
 	jaegerlog "github.com/uber/jaeger-lib/metrics"
@@ -23,7 +25,8 @@ func Init(service string) io.Closer {
 			Param: 1,
 		},
 		Reporter: &jaegercfg.ReporterConfig{
-			LogSpans: true,
+			LocalAgentHostPort: fmt.Sprintf("%s:%d", viper.GetString("jaegerHost"), viper.GetInt("jaegerPort")),
+			LogSpans:           true,
 		},
 	}
 	cfg, _ := defaultCfg.FromEnv()
