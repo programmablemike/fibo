@@ -27,7 +27,6 @@ func Init(service string) io.Closer {
 		},
 	}
 	cfg, _ := defaultCfg.FromEnv()
-	log.Infof("Using Jaeger configuration %v", cfg)
 
 	jMetricsFactory := jaegerlog.NullFactory
 	tracer, closer, err := cfg.NewTracer(

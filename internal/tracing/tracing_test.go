@@ -9,8 +9,7 @@ import (
 )
 
 func TestSetupTracer(t *testing.T) {
-	closer := SetupTracing("TestSetupTracer")
-	assert.NoError(t, err)
+	closer := Init("TestSetupTracer")
 	// defer closing the tracer
 	defer func() {
 		err := closer.Close()
@@ -20,7 +19,7 @@ func TestSetupTracer(t *testing.T) {
 }
 
 func TestLogSpans(t *testing.T) {
-	closer := SetupTracing("TestLogSpans")
+	closer := Init("TestLogSpans")
 	// defer closing the tracer while checking for any errors
 	defer func() {
 		err := closer.Close()
