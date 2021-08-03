@@ -2,7 +2,6 @@
 package router
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -16,23 +15,12 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-type ContextFields int
-
-const (
-	RequestSpan = iota
-)
-
-// SetContextValue writes the given context value (v) to key (k) for a http.Request
-func SetContextValue(r *http.Request, k ContextFields, v interface{}) *http.Request {
-	if v == nil {
-		return r
-	}
-	return r.WithContext(context.WithValue(r.Context(), k, v))
-}
-
-// GetContextValue retrieves a value from the request context
-func GetContextValue(r *http.Request, k ContextFields) interface{} {
-	return r.Context().Value(k)
+// EncodeJsonResponse encodes the provided body to a JSON response
+// Additionally it adds an opentracing Span to time how long encoding is taking
+func EncodeJsonResponse(w http.ResponseWriter, req *http.Request, body interface{}) {
+	s := tracing.StartSpanFromContext(req.Context(), "encode-json-response")
+	defer s.Finish()
+	json.NewEncoder(w).Encode(body)
 }
 
 // MiddlewareExtractTracer extracts any Jaeger tracers from the HTTP headers and adds
@@ -43,7 +31,7 @@ func MiddlewareExtractTracer(span string, next http.HandlerFunc) http.HandlerFun
 		span := tracing.StartSpanFromRequest(span, opentracing.GlobalTracer(), req)
 		defer span.Finish()
 		// Save the span info to the http.Request context for retrieving later
-		req = SetContextValue(req, RequestSpan, span)
+		req = req.WithContext(tracing.SaveParentSpan(req.Context(), span))
 		next(res, req)
 	}
 }
@@ -53,7 +41,7 @@ func MiddlewareExtractTracer(span string, next http.HandlerFunc) http.HandlerFun
 func MiddlewareAddHttpTraceTags(next http.HandlerFunc) http.HandlerFunc {
 	return func(res http.ResponseWriter, req *http.Request) {
 		log.Debug("running MiddlewareAddHttpTraceTags")
-		span := GetContextValue(req, RequestSpan).(opentracing.Span)
+		span := tracing.GetParentSpan(req.Context())
 		span.SetTag("http.method", req.Method)
 		span.SetTag("http.url", req.URL.String())
 		next(res, req)
@@ -69,7 +57,7 @@ func NewRouter(gen *fibonacci.Generator) *mux.Router {
 			Status:  api.StatusOK,
 			Message: "OK",
 		}
-		json.NewEncoder(w).Encode(res)
+		EncodeJsonResponse(w, r, res)
 	})
 
 	// Ordinal handler
@@ -87,7 +75,7 @@ func NewRouter(gen *fibonacci.Generator) *mux.Router {
 							Message: "failed to parse ordinal value",
 						}
 						w.WriteHeader(http.StatusBadRequest)
-						json.NewEncoder(w).Encode(res)
+						EncodeJsonResponse(w, r, res)
 						return
 					}
 					value := gen.Compute(ord)
@@ -97,7 +85,7 @@ func NewRouter(gen *fibonacci.Generator) *mux.Router {
 						Value:   value.String(),
 					}
 					w.WriteHeader(http.StatusOK)
-					json.NewEncoder(w).Encode(res)
+					EncodeJsonResponse(w, r, res)
 				}))).Methods("GET")
 
 	r.HandleFunc("/fibo/cache",
@@ -113,7 +101,7 @@ func NewRouter(gen *fibonacci.Generator) *mux.Router {
 							Message: fmt.Sprintf("%e", err),
 						}
 						w.WriteHeader(http.StatusInternalServerError)
-						json.NewEncoder(w).Encode(res)
+						EncodeJsonResponse(w, r, res)
 						return
 					}
 					res := api.GenericResponse{
@@ -121,7 +109,7 @@ func NewRouter(gen *fibonacci.Generator) *mux.Router {
 						Message: "Cache cleared",
 					}
 					w.WriteHeader(http.StatusOK)
-					json.NewEncoder(w).Encode(res)
+					EncodeJsonResponse(w, r, res)
 				}))).Methods("DELETE")
 
 	// Step counter
@@ -138,7 +126,7 @@ func NewRouter(gen *fibonacci.Generator) *mux.Router {
 							Message: "failed to parse Fibonacci number value",
 						}
 						w.WriteHeader(http.StatusBadRequest)
-						json.NewEncoder(w).Encode(res)
+						EncodeJsonResponse(w, r, res)
 						return
 					}
 					value := gen.FindOrdinalsInRange(fibonacci.NewNumber(0), number)
@@ -148,7 +136,7 @@ func NewRouter(gen *fibonacci.Generator) *mux.Router {
 						Value:   fibonacci.Uint64ToString(value),
 					}
 					w.WriteHeader(http.StatusOK)
-					json.NewEncoder(w).Encode(res)
+					EncodeJsonResponse(w, r, res)
 				}))).Methods("GET")
 
 	return r

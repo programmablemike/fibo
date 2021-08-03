@@ -1,6 +1,7 @@
 package tracing
 
 import (
+	"context"
 	"fmt"
 	"io"
 	"net/http"
@@ -13,6 +14,32 @@ import (
 	jaegercfg "github.com/uber/jaeger-client-go/config"
 	jaegerlog "github.com/uber/jaeger-lib/metrics"
 )
+
+type ContextValue int
+
+const (
+	ParentSpan ContextValue = iota
+)
+
+func SaveParentSpan(ctx context.Context, span opentracing.Span) context.Context {
+	return context.WithValue(ctx, ParentSpan, span)
+}
+
+func GetParentSpan(ctx context.Context) opentracing.Span {
+	return ctx.Value(ParentSpan).(opentracing.Span)
+}
+
+func StartSpan(name string) opentracing.Span {
+	return opentracing.StartSpan(name)
+}
+
+func StartSpanFromParent(name string, parent opentracing.Span) opentracing.Span {
+	return opentracing.StartSpan(name, opentracing.ChildOf(parent.Context()))
+}
+
+func StartSpanFromContext(ctx context.Context, name string) opentracing.Span {
+	return StartSpanFromParent(name, GetParentSpan(ctx))
+}
 
 // SetupTracing initializes a new OpenTracing tracer
 // returns an io.Closer to be deferred in main() to flush the stream

@@ -80,7 +80,7 @@ func (ac ApiClient) DecodeGenericResponse(res *http.Response) *GenericResponse {
 }
 
 func (ac ApiClient) Count(max *fibonacci.Number) (string, error) {
-	span := opentracing.StartSpan("count")
+	span := opentracing.StartSpan("count-request")
 	defer span.Finish()
 	uri := fmt.Sprintf("%s/count/%s", ac.GetApiBaseUri(), max.String())
 
@@ -102,7 +102,7 @@ func (ac ApiClient) Count(max *fibonacci.Number) (string, error) {
 }
 
 func (ac ApiClient) Calculate(ordinal uint64) (string, error) {
-	span := opentracing.StartSpan("calculate")
+	span := opentracing.StartSpan("calculate-request")
 	defer span.Finish()
 	uri := fmt.Sprintf("%s/calculate/%s", ac.GetApiBaseUri(), fibonacci.Uint64ToString(ordinal))
 
@@ -123,7 +123,7 @@ func (ac ApiClient) Calculate(ordinal uint64) (string, error) {
 }
 
 func (ac ApiClient) ClearCache() error {
-	span := opentracing.StartSpan("clear-cache")
+	span := opentracing.StartSpan("clear-cache-request")
 	defer span.Finish()
 	uri := fmt.Sprintf("%s/cache", ac.GetApiBaseUri())
 

@@ -2,10 +2,12 @@
 package cache
 
 import (
+	"context"
 	"fmt"
 	"time"
 
 	"github.com/programmablemike/fibo/internal/fibonacci"
+	"github.com/programmablemike/fibo/internal/tracing"
 	log "github.com/sirupsen/logrus"
 	pg "gorm.io/driver/postgres"
 	gorm "gorm.io/gorm"
@@ -25,6 +27,7 @@ func (c CacheEntry) String() string {
 
 // Cache implements a PostgresDB cache for pre-computed ordinal values
 type Cache struct {
+	context     context.Context
 	db          *gorm.DB
 	initialized bool
 }
@@ -41,6 +44,7 @@ func NewCache(dsn string) *Cache {
 	}
 	log.Info("Successfully connected to database.")
 	cache := &Cache{
+		context:     context.Background(),
 		db:          db,
 		initialized: false,
 	}
@@ -48,6 +52,10 @@ func NewCache(dsn string) *Cache {
 		log.Errorf("Failed to initialize the database: %s", err)
 	}
 	return cache
+}
+
+func (c *Cache) SetContext(ctx context.Context) {
+	c.context = ctx
 }
 
 // init the cache database
@@ -108,6 +116,9 @@ func (c *Cache) Close() error {
 }
 
 func (c *Cache) Clear() error {
+	if span := tracing.StartSpanFromContext(c.context, "clear"); span != nil {
+		defer span.Finish()
+	}
 	log.Info("Clearing the database.")
 	// Deletes all cache entries
 	// Note that this only "tombstones" the entries in Gorm by adding a "deleted_at" timestamp
@@ -116,6 +127,9 @@ func (c *Cache) Clear() error {
 }
 
 func (c *Cache) Write(ordinal uint64, value *fibonacci.Number) error {
+	if span := tracing.StartSpanFromContext(c.context, "write"); span != nil {
+		defer span.Finish()
+	}
 	entry := &CacheEntry{
 		Ordinal: ordinal,
 		Value:   value.String(),
@@ -128,6 +142,9 @@ func (c *Cache) Write(ordinal uint64, value *fibonacci.Number) error {
 }
 
 func (c *Cache) Read(ordinal uint64) (*fibonacci.Number, error) {
+	if span := tracing.StartSpanFromContext(c.context, "read"); span != nil {
+		defer span.Finish()
+	}
 	entry := new(CacheEntry)
 	result := c.db.Where("ordinal = ?", ordinal).First(entry)
 	if result.Error != nil {

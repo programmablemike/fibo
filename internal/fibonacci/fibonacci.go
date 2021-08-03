@@ -2,9 +2,11 @@
 package fibonacci
 
 import (
+	"context"
 	"math/big"
 	"strconv"
 
+	"github.com/programmablemike/fibo/internal/tracing"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -27,6 +29,7 @@ type Memoizer interface {
 	Write(ordinal uint64, value *Number) error
 	Read(ordinal uint64) (*Number, error)
 	Clear() error
+	SetContext(ctx context.Context)
 }
 
 func Uint64ToString(v uint64) string {
@@ -42,22 +45,31 @@ func StringToUint64(v string) (uint64, error) {
 }
 
 type Generator struct {
-	cache Memoizer
+	cache   Memoizer
+	context context.Context
 }
 
-func NewGenerator(cache Memoizer) *Generator {
+// NewGenerator creates a new Fibonacci generator
+// ctx is added for implementing tracing support to get more specific information around performance
+func NewGenerator(ctx context.Context, cache Memoizer) *Generator {
 	// TODO: Convert this to using a goroutine for concurrent execution
 	return &Generator{
-		cache: cache,
+		context: ctx,
+		cache:   cache,
 	}
 }
 
 // ClearCache wipes the memoizer's Postgres DB
 func (g *Generator) ClearCache() error {
+	span := tracing.StartSpanFromContext(g.context, "clear-cache")
+	defer span.Finish()
 	return g.cache.Clear()
 }
 
 func (g *Generator) FindOrdinalsInRange(low *Number, high *Number) uint64 {
+	span := tracing.StartSpanFromContext(g.context, "find-ordinals-in-range")
+	defer span.Finish()
+
 	log.Debugf("Counting ordinals in range %s to %s...", low.String(), high.String())
 
 	// Initialize the first three fibonacci values
@@ -85,7 +97,9 @@ func (g *Generator) FindOrdinalsInRange(low *Number, high *Number) uint64 {
 // Compute Get the fibonacci value for the given ordinal
 // Defined as f(n) = f(n-2) + f(n-1) where f(0) = 0 and f(1) = 1
 // Returns -1 for invalid values
-func (g Generator) Compute(n uint64) *Number {
+func (g *Generator) Compute(n uint64) *Number {
+	span := tracing.StartSpanFromContext(g.context, "compute")
+	defer span.Finish()
 	log.Debugf("Computing fibonacci sequence for ordinal=%s", Uint64ToString(n))
 
 	switch {
@@ -107,12 +121,20 @@ func (g Generator) Compute(n uint64) *Number {
 // readCachedOrCompute will read a value from the database if it exists
 // otherwise it will compute the value and store it in the cache for future use
 func (g *Generator) readCachedOrCompute(ordinal uint64) *Number {
+	span := tracing.StartSpanFromContext(g.context, "read-cached-or-compute")
+	defer span.Finish()
+	g.cache.SetContext(tracing.SaveParentSpan(context.Background(), span))
 	value, err := g.cache.Read(ordinal)
 	if err != nil {
 		value = g.Compute(ordinal)
+		g.cache.SetContext(tracing.SaveParentSpan(context.Background(), span))
 		if err := g.cache.Write(ordinal, value); err != nil {
 			log.Errorf("Failed to write to cache")
 		}
+		span.SetTag("cache_hit", false)
+		return value
+	} else {
+		span.SetTag("cache_hit", true)
+		return value
 	}
-	return value
 }

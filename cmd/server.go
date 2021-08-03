@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 
@@ -59,10 +60,14 @@ var serverCmd = &cobra.Command{
 
 		closer := tracing.Init("fibo-server")
 		defer closer.Close()
+		span := tracing.StartSpan("server-handler")
+		defer span.Finish()
 
 		dsn := createDsnFromConfig()
-		c := cache.NewCache(dsn)
-		gen := fibonacci.NewGenerator(c)
+		ctx := tracing.SaveParentSpan(context.Background(), span)
+		cache := cache.NewCache(dsn)
+		cache.SetContext(ctx)
+		gen := fibonacci.NewGenerator(ctx, cache)
 		r := router.NewRouter(gen)
 		addr := fmt.Sprintf("%s:%d", viper.GetString("host"), viper.GetInt("port"))
 		log.Info("Started server at ", addr)
