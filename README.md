@@ -1,5 +1,5 @@
 # fibo
-A technical interview project for [Reserve Trust](https://www.reservetrust.com/).
+A technical interview project.
 
 ## setup
 Requires:  
